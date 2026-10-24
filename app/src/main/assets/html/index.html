@@ -1,46 +1,2338 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta name="theme-color" content="#6200EE">
-    <title>WebView App</title>
-    <link rel="stylesheet" href="file:///android_asset/css/app.css">
+<html lang="fa" dir="rtl"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08382F">
+<title>راز کتاب — نمونه گرافیکی</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#104D40; --deep:#08382F; --gold:#F6B923; --gold-l:#FFE0A0; --gold-d:#C98F0B;
+  --cream:#FFF8E9; --charcoal:#26332D; --gray:#8B9188; --red:#E65335;
+  --teal:#1F7A6B; --purple:#4A3566; --navy:#12283A; --brown:#5A3A28;
+  --hair:rgba(246,185,35,.24); --hair-soft:rgba(246,185,35,.13);
+  --glass:linear-gradient(180deg,rgba(255,248,233,.075),rgba(255,248,233,.018));
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{
+  min-height:100dvh;background-color:#05100e;color:var(--cream);
+  font-family:'Vazirmatn','Segoe UI',Tahoma,'Iranian Sans',sans-serif;
+  font-size:14.5px;line-height:1.75;-webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(62% 48% at 50% -6%,rgba(23,98,79,.62),transparent 72%),
+    radial-gradient(40% 38% at 90% 104%,rgba(246,185,35,.12),transparent 70%),
+    radial-gradient(38% 38% at 4% 92%,rgba(74,53,102,.26),transparent 72%);
+  background-attachment:fixed;
+}
+img{display:block;max-width:100%}
+button{font-family:inherit}
+/* ---------- stage / device ---------- */
+.stage{min-height:100dvh;display:grid;place-items:center;padding:24px}
+.device{position:relative;width:100%;max-width:432px;height:min(904px,calc(100dvh - 48px))}
+.device::before{content:'';position:absolute;inset:-1px;border-radius:44px;padding:1px;pointer-events:none;z-index:4;
+  background:linear-gradient(150deg,rgba(246,185,35,.6),rgba(246,185,35,.05) 34%,rgba(246,185,35,0) 62%,rgba(246,185,35,.34));
+  -webkit-mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+  -webkit-mask-composite:xor;mask:linear-gradient(#000,#000) content-box,linear-gradient(#000,#000);
+  mask-composite:exclude}
+.app{position:absolute;inset:0;border-radius:44px;overflow:hidden;
+  background:radial-gradient(118% 68% at 50% -10%,#17624f 0%,#104D40 44%,#08382F 100%);
+  box-shadow:0 56px 130px -46px #000,0 0 90px -30px rgba(246,185,35,.18)}
+.app::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:9;opacity:.35;
+  background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:3px 3px}
+@media (max-width:620px){
+  .stage{padding:0}
+  .device{max-width:none;height:100dvh}
+  .device::before{display:none}
+  .app{border-radius:0;box-shadow:none}
+}
+/* ---------- views ---------- */
+.view{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;padding:18px 17px 116px;
+  opacity:0;visibility:hidden;pointer-events:none;transform:translateY(14px);
+  transition:opacity .32s ease,transform .5s cubic-bezier(.22,1,.36,1),visibility .32s}
+.view.active{opacity:1;visibility:visible;pointer-events:auto;transform:none}
+.view::-webkit-scrollbar{width:0;height:0}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.muted{color:var(--gray)}
+.gold{color:var(--gold)}
+.h1{font-size:23px;font-weight:800;line-height:1.45;letter-spacing:-.01em}
+.h2{font-size:16.5px;font-weight:700}
+.sm{font-size:12px}
+.eyebrow{font-size:10.5px;letter-spacing:.22em;color:var(--gray);font-weight:500}
+.rule{height:1px;background:linear-gradient(90deg,transparent,var(--hair),transparent);margin:16px 0}
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:9px;background:none;border:0;padding:0;color:inherit;cursor:pointer}
+.brand-mark{width:37px;height:37px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(160deg,rgba(246,185,35,.22),rgba(246,185,35,.03));
+  border:1px solid var(--hair);box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.brand-mark svg{width:21px;height:21px;color:var(--gold)}
+.brand-name{font-size:18.5px;font-weight:800;line-height:1.2;
+  background:linear-gradient(180deg,#FFF0CC,#F6B923 55%,#D29510);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.brand-sub{display:block;font-size:9px;letter-spacing:.3em;color:var(--gray);font-weight:500;margin-top:1px}
+.uchip{display:flex;align-items:center;gap:8px;background:none;border:0;padding:0;cursor:pointer;color:inherit}
+.uchip img{width:39px;height:39px;border-radius:14px;object-fit:cover;object-position:50% 28%;
+  border:1px solid rgba(246,185,35,.4);box-shadow:0 0 0 2px rgba(246,185,35,.12)}
+.uchip .uname{font-size:11px;color:rgba(255,248,233,.8);max-width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* ---------- hero ---------- */
+.hero{position:relative;border-radius:25px;overflow:hidden;border:1px solid var(--hair);aspect-ratio:1/1.04;
+  box-shadow:0 30px 66px -32px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.1);
+  animation:rise .8s cubic-bezier(.22,1,.36,1) both}
+.hero img{width:100%;height:100%;object-fit:cover}
+.hero-tint{position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(8,56,47,0) 34%,rgba(8,56,47,.9) 90%),
+  radial-gradient(78% 46% at 50% 8%,rgba(246,185,35,.14),transparent 72%)}
+.hero-cap{position:absolute;inset-inline:0;bottom:0;padding:15px 16px}
+.hero-cap .t{font-size:15px;font-weight:700}
+.hero-cap .d{font-size:11px;color:rgba(255,248,233,.62);margin-top:1px}
+.hero-badge{position:absolute;top:12px;inset-inline-start:12px;display:flex;align-items:center;gap:6px;
+  padding:5px 10px;border-radius:99px;font-size:10px;color:var(--gold-l);
+  background:rgba(8,56,47,.62);border:1px solid var(--hair);backdrop-filter:blur(8px)}
+.hero-badge .dot{width:5px;height:5px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+/* ---------- mode cards ---------- */
+.modes{display:grid;gap:11px;margin-top:15px}
+.mode{position:relative;display:flex;align-items:center;gap:13px;padding:15px;border-radius:20px;
+  border:1px solid var(--hair);overflow:hidden;cursor:pointer;text-align:start;color:inherit;
+  transition:transform .3s,border-color .3s,box-shadow .35s;animation:rise .8s cubic-bezier(.22,1,.36,1) both}
+.mode:nth-child(2){animation-delay:.08s}
+.mode:active{transform:scale(.985)}
+.mode-bot{background:linear-gradient(115deg,rgba(246,185,35,.16),rgba(16,77,64,.42) 52%,rgba(8,56,47,.72))}
+.mode-bot::after{content:'';position:absolute;inset-inline-start:-34px;top:-46px;width:158px;height:158px;
+  background:radial-gradient(circle,rgba(246,185,35,.26),transparent 66%);pointer-events:none}
+.mode-friend{background:linear-gradient(115deg,rgba(31,122,107,.3),rgba(74,53,102,.24) 58%,rgba(8,56,47,.74))}
+.mode-ic{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;flex:none;
+  border:1px solid var(--hair);background:rgba(6,40,34,.5);position:relative;z-index:1}
+.mode-ic svg{width:24px;height:24px;color:var(--gold)}
+.mode-body{flex:1;min-width:0;position:relative;z-index:1}
+.mode-body .t{display:block;font-size:14.5px;font-weight:700}
+.mode-body .d{display:block;font-size:11px;color:rgba(255,248,233,.6);margin-top:1px}
+.duo{position:relative;width:42px;height:32px;display:block;flex:none}
+.duo img{position:absolute;top:0;width:29px;height:29px;border-radius:50%;object-fit:cover;object-position:50% 25%;border:1.5px solid rgba(246,185,35,.65)}
+.duo img:first-child{inset-inline-start:0;z-index:2}
+.duo img:last-child{inset-inline-end:0;z-index:1}
+.chev{width:15px;height:15px;color:var(--gold);opacity:.75;flex:none;transform:scaleX(-1)}
+/* ---------- nav ---------- */
+.nav{position:absolute;inset-inline:0;bottom:0;height:92px;display:grid;grid-template-columns:repeat(5,1fr);
+  align-items:start;padding-top:13px;z-index:8;
+  background:linear-gradient(180deg,rgba(6,38,33,0),rgba(6,38,33,.88) 32%,#052a24);
+  border-top:1px solid rgba(246,185,35,.13);backdrop-filter:blur(16px)}
+.nav::before{content:'';position:absolute;top:0;inset-inline:12%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(246,185,35,.5),transparent)}
+.nav-i{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;padding:0;
+  color:rgba(139,145,136,.95);font-size:9.5px;cursor:pointer;transition:color .25s}
+.nav-i svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .3s}
+.nav-i.active{color:var(--gold)}
+.nav-c{display:flex;justify-content:center}
+.nav-c .nav-i{margin-top:-19px;gap:3px}
+.nav-c .ring{width:60px;height:60px;border-radius:21px;display:grid;place-items:center;
+  background:linear-gradient(160deg,#1c7060,#0a3a31);border:1px solid rgba(246,185,35,.5);
+  box-shadow:0 16px 32px -12px rgba(246,185,35,.42),inset 0 1px 0 rgba(255,255,255,.16);
+  transition:box-shadow .3s,transform .3s}
+.nav-c .ring svg{width:25px;height:25px;color:var(--gold)}
+.nav-c .nav-i.active .ring{box-shadow:0 18px 40px -10px rgba(246,185,35,.62),inset 0 1px 0 rgba(255,255,255,.22);transform:translateY(-2px)}
+/* ---------- buttons ---------- */
+.btn{font-size:13.5px;font-weight:700;border-radius:16px;border:1px solid transparent;padding:12px 18px;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .25s,box-shadow .3s,background .3s,border-color .3s}
+.btn:active{transform:scale(.98)}
+.btn svg{width:17px;height:17px}
+.btn-gold{background:linear-gradient(160deg,#FFD97A,#F6B923 48%,#D89B0F);color:#26332D;
+  box-shadow:0 18px 38px -16px rgba(246,185,35,.6),inset 0 1px 0 rgba(255,255,255,.55)}
+.btn-ghost{background:rgba(255,248,233,.05);border-color:var(--hair);color:var(--cream)}
+.btn-block{width:100%}
+.btn-sm{padding:9px 14px;font-size:12px;border-radius:13px}
+.btn:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
+/* ---------- generic surfaces ---------- */
+.card{background:var(--glass);border:1px solid var(--hair-soft);border-radius:20px;padding:15px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.paper{position:relative;border-radius:19px;padding:17px 16px;color:#25322B;
+  background:linear-gradient(180deg,#FFF8E9,#F2E5CB);
+  box-shadow:0 20px 44px -24px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.9)}
+.paper::before{content:'';position:absolute;inset:6px;border:1px solid rgba(198,150,25,.28);border-radius:14px;pointer-events:none}
+.paper .q{position:relative;font-size:16px;font-weight:700;line-height:1.95;text-align:center}
+.paper .qsub{position:relative;font-size:11px;color:#8B7440;text-align:center;margin-top:6px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin:22px 0 11px}
+.sec-head .t{font-size:14.5px;font-weight:700}
+.sec-head .t::after{content:'';display:block;width:26px;height:2px;border-radius:2px;margin-top:5px;
+  background:linear-gradient(90deg,var(--gold),rgba(246,185,35,0))}
+.link{background:none;border:0;color:var(--gold);font-size:11.5px;cursor:pointer;padding:0}
+/* ---------- avatar gallery ---------- */
+.tabs{display:flex;gap:7px;background:rgba(6,40,34,.5);border:1px solid var(--hair-soft);border-radius:15px;padding:4px;margin:14px 0 16px}
+.tab{flex:1;border:0;background:none;color:var(--gray);font-size:12.5px;font-weight:600;padding:8px;border-radius:11px;cursor:pointer;transition:.28s}
+.tab.active{background:linear-gradient(160deg,rgba(246,185,35,.2),rgba(246,185,35,.06));color:var(--gold-l);box-shadow:inset 0 0 0 1px var(--hair)}
+.av-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.av-tile{position:relative;aspect-ratio:1/1.2;border-radius:15px;overflow:hidden;cursor:pointer;padding:0;
+  border:1px solid rgba(246,185,35,.16);background:#0a3a31;transition:transform .3s,box-shadow .35s,border-color .3s}
+.av-tile img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.av-tile:hover img{transform:scale(1.05)}
+.av-tile::after{content:'';position:absolute;inset-inline:0;bottom:0;height:46%;
+  background:linear-gradient(180deg,rgba(8,56,47,0),rgba(6,36,31,.92))}
+.av-tile .nm{position:absolute;inset-inline:0;bottom:5px;text-align:center;font-size:9.5px;z-index:2;color:rgba(255,248,233,.82)}
+.av-tile.selected{border-color:var(--gold);transform:translateY(-3px);
+  box-shadow:0 0 0 2px rgba(246,185,35,.85),0 16px 32px -14px rgba(246,185,35,.6)}
+.av-tile .tick{position:absolute;top:5px;inset-inline-start:5px;width:18px;height:18px;border-radius:50%;z-index:2;
+  display:grid;place-items:center;background:linear-gradient(160deg,#FFD97A,#F6B923);opacity:0;transform:scale(.6);transition:.3s}
+.av-tile .tick svg{width:11px;height:11px;color:#26332D}
+.av-tile.selected .tick{opacity:1;transform:scale(1)}
+.av-preview{position:relative;border-radius:24px;overflow:hidden;aspect-ratio:1/1.02;margin-bottom:14px;
+  border:1px solid rgba(246,185,35,.4);box-shadow:0 30px 60px -28px #000,inset 0 0 0 1px rgba(255,255,255,.05)}
+.av-preview img{width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+.av-preview .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,56,47,0) 40%,rgba(6,32,28,.92))}
+.av-preview .meta{position:absolute;inset-inline:0;bottom:0;padding:16px;display:flex;align-items:flex-end;justify-content:space-between}
+.av-preview .nm{font-size:20px;font-weight:800}
+.av-preview .sub{font-size:11px;color:rgba(255,248,233,.62)}
+.ribbon{position:absolute;top:12px;inset-inline-end:12px;padding:5px 11px;border-radius:99px;font-size:10px;
+  color:#26332D;background:linear-gradient(160deg,#FFD97A,#F6B923);font-weight:700;
+  box-shadow:0 10px 22px -10px rgba(246,185,35,.9)}
+/* ---------- topics ---------- */
+.topic{display:flex;align-items:center;gap:14px;width:100%;text-align:start;color:inherit;cursor:pointer;
+  padding:13px;border-radius:21px;border:1px solid var(--hair-soft);background:var(--glass);
+  transition:border-color .3s,transform .3s,box-shadow .3s;margin-bottom:11px}
+.topic:hover{border-color:rgba(246,185,35,.42)}
+.topic.selected{border-color:var(--gold);box-shadow:0 0 0 1px rgba(246,185,35,.6),0 20px 44px -26px rgba(246,185,35,.6)}
+.topic .thumb{width:78px;height:78px;border-radius:16px;overflow:hidden;flex:none;border:1px solid rgba(246,185,35,.22)}
+.topic .thumb img{width:100%;height:100%;object-fit:cover}
+.topic .tx{flex:1;min-width:0}
+.topic .tx .t{font-size:14.5px;font-weight:700}
+.topic .tx .d{font-size:11px;color:rgba(255,248,233,.58);margin-top:2px}
+.topic .tx .tags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.pill{font-size:9.5px;padding:2px 8px;border-radius:99px;border:1px solid var(--hair-soft);color:rgba(255,248,233,.66);background:rgba(255,248,233,.04)}
+/* ---------- question ---------- */
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}
+.qmode{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--gold-l)}
+.qmode .g{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 9px var(--gold)}
+.qnum{font-size:11px;color:var(--gray)}
+.qnum b{color:var(--cream);font-weight:700}
+.timer{position:relative;width:46px;height:46px;flex:none;display:grid;place-items:center}
+.timer svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.timer .tbg{fill:none;stroke:rgba(255,248,233,.13);stroke-width:2.6}
+.timer .tfg{fill:none;stroke:var(--gold);stroke-width:2.6;stroke-linecap:round;stroke-dasharray:119;stroke-dashoffset:38;
+  filter:drop-shadow(0 0 5px rgba(246,185,35,.7))}
+.timer span{font-size:10.5px;font-weight:700;color:var(--gold-l);letter-spacing:.02em}
+.bar{height:5px;border-radius:99px;background:rgba(255,248,233,.11);overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#C98F0B,#F6B923 60%,#FFE6AE);
+  box-shadow:0 0 12px rgba(246,185,35,.55);transition:width .6s cubic-bezier(.22,1,.36,1)}
+.clues{display:flex;gap:8px;margin-bottom:15px}
+.clue{flex:1;min-height:74px;border-radius:14px;border:1px dashed rgba(246,185,35,.26);background:rgba(255,248,233,.025);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:7px;text-align:center;
+  font-size:10px;color:var(--gray);transition:.35s;cursor:pointer;line-height:1.55}
+.clue svg{width:15px;height:15px;opacity:.7}
+.clue .k{font-size:9px;letter-spacing:.12em;color:rgba(246,185,35,.75)}
+.clue.revealed{border-style:solid;border-color:rgba(246,185,35,.4);color:rgba(255,248,233,.9);
+  background:linear-gradient(180deg,rgba(246,185,35,.13),rgba(246,185,35,.02));font-size:10.5px}
+.clue.active{border-style:solid;border-color:var(--gold);color:var(--gold-l);
+  box-shadow:0 0 0 1px rgba(246,185,35,.45),0 10px 26px -12px rgba(246,185,35,.6);animation:breathe 2.8s ease-in-out infinite}
+.opts{display:grid;gap:9px;margin-top:14px}
+.opt{position:relative;display:flex;align-items:center;gap:11px;padding:13px 14px;border-radius:15px;cursor:pointer;
+  border:1px solid rgba(255,248,233,.12);background:rgba(255,248,233,.035);color:var(--cream);
+  font-size:13px;text-align:start;transition:.28s;line-height:1.7}
+.opt:hover{border-color:rgba(246,185,35,.34)}
+.opt .k{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;flex:none;font-size:11px;font-weight:700;
+  color:rgba(255,248,233,.7);border:1px solid rgba(255,248,233,.16);background:rgba(255,248,233,.05);transition:.28s}
+.opt .mk{width:16px;height:16px;margin-inline-start:auto;opacity:0;transition:.28s;flex:none}
+.opt.selected{border-color:var(--gold);background:linear-gradient(160deg,rgba(246,185,35,.16),rgba(246,185,35,.03))}
+.opt.selected .k{background:linear-gradient(160deg,#FFD97A,#F6B923);color:#26332D;border-color:transparent}
+.opt.correct{border-color:#38A07F;background:linear-gradient(160deg,rgba(56,160,127,.24),rgba(56,160,127,.05))}
+.opt.correct .k{background:#38A07F;color:#04241C;border-color:transparent}
+.opt.correct .mk{opacity:1;color:#7FE4C3}
+.opt.wrong{border-color:#E65335;background:linear-gradient(160deg,rgba(230,83,53,.2),rgba(230,83,53,.04))}
+.opt.wrong .k{background:#E65335;color:#2A0A05;border-color:transparent}
+.opt.wrong .mk{opacity:1;color:#FFB6A6}
+.feedback{margin-top:14px;padding:13px 14px;border-radius:15px;border:1px solid var(--hair-soft);
+  background:linear-gradient(160deg,rgba(255,248,233,.07),rgba(255,248,233,.02));font-size:11.5px;
+  color:rgba(255,248,233,.78);opacity:0;max-height:0;overflow:hidden;transition:opacity .4s,max-height .5s,padding .4s}
+.feedback.show{opacity:1;max-height:220px;padding:13px 14px}
+.feedback .tt{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--gold-l);margin-bottom:4px}
+/* ---------- book ---------- */
+.bookwrap{display:grid;place-items:center;padding:6px 0 16px}
+.book{position:relative;width:150px;aspect-ratio:2/3;border-radius:5px 13px 13px 5px;overflow:hidden;
+  transform:perspective(900px) rotateY(-9deg) rotateX(2deg);transform-style:preserve-3d;
+  box-shadow:-14px 22px 46px -18px rgba(0,0,0,.95),0 0 0 1px rgba(246,185,35,.3),inset 0 0 40px rgba(0,0,0,.35)}
+.book img{width:100%;height:100%;object-fit:cover}
+.book .spine{position:absolute;inset-block:0;inset-inline-start:0;width:14px;
+  background:linear-gradient(90deg,rgba(0,0,0,.62),rgba(0,0,0,.08));box-shadow:inset -1px 0 0 rgba(246,185,35,.35)}
+.book .title{position:absolute;inset-inline:14px 10px;top:34%;text-align:center;font-size:12.5px;font-weight:800;
+  color:#F7DFA2;text-shadow:0 2px 10px rgba(0,0,0,.85);line-height:1.6}
+.book-glow{position:absolute;inset:auto -30px -30px;height:120px;background:radial-gradient(50% 60% at 50% 100%,rgba(246,185,35,.3),transparent 70%);z-index:-1}
+/* ---------- result ---------- */
+.res-hero{position:relative;display:grid;place-items:center;padding:6px 0 4px}
+.res-frame{position:relative;width:132px;height:132px;border-radius:50%;padding:5px;
+  background:conic-gradient(from 140deg,rgba(246,185,35,.05),rgba(246,185,35,.85),rgba(246,185,35,.08),rgba(246,185,35,.7),rgba(246,185,35,.05));
+  box-shadow:0 22px 50px -22px rgba(246,185,35,.55)}
+.res-frame img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:50% 22%;border:2px solid #0a3a31}
+.res-title{text-align:center;margin-top:14px}
+.res-title .t{font-size:22px;font-weight:800}
+.res-title .d{font-size:11.5px;color:rgba(255,248,233,.6);margin-top:2px}
+.res-score{display:flex;justify-content:center;margin:14px 0 4px}
+.res-score .n{font-size:44px;font-weight:900;line-height:1;
+  background:linear-gradient(180deg,#FFF0CC,#F6B923 60%,#C98F0B);-webkit-background-clip:text;background-clip:text;color:transparent}
+.res-score .p{font-size:16px;font-weight:700;color:var(--gold);align-self:flex-start;margin-top:6px}
+.variants{display:flex;gap:6px;justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.vchip{font-size:10.5px;padding:6px 11px;border-radius:99px;cursor:pointer;color:var(--gray);
+  background:rgba(255,248,233,.04);border:1px solid var(--hair-soft);transition:.25s}
+.vchip.active{color:var(--gold-l);border-color:rgba(246,185,35,.5);background:rgba(246,185,35,.12)}
+.metrics{display:grid;gap:11px;margin-top:6px}
+.metric .l{display:flex;justify-content:space-between;font-size:11px;color:rgba(255,248,233,.66);margin-bottom:5px}
+.metric .l b{color:var(--cream);font-weight:700}
+.medals{display:flex;gap:10px;justify-content:center;margin:16px 0 4px}
+.medal{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;position:relative;
+  background:radial-gradient(circle at 35% 25%,rgba(255,240,204,.32),rgba(246,185,35,.1) 60%,rgba(8,56,47,.6));
+  border:1px solid var(--hair);color:var(--gold);box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+.medal svg{width:22px;height:22px}
+.medal.off{color:rgba(255,248,233,.24);border-color:rgba(255,248,233,.1);background:rgba(255,248,233,.03);box-shadow:none}
+.medal .lb{position:absolute;bottom:-15px;font-size:8px;color:var(--gray);white-space:nowrap}
+.res-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:28px}
+/* ---------- records ---------- */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{border-radius:16px;padding:11px 10px;text-align:center;border:1px solid var(--hair-soft);background:var(--glass)}
+.stat .n{font-size:19px;font-weight:800;color:var(--gold-l)}
+.stat .l{font-size:9.5px;color:var(--gray);margin-top:1px}
+.chart{display:flex;align-items:flex-end;gap:8px;height:118px;padding:10px 4px 0;
+  border-bottom:1px solid rgba(255,248,233,.1);position:relative}
+.chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+.chart .bx{width:100%;max-width:26px;border-radius:7px 7px 3px 3px;
+  background:linear-gradient(180deg,#FFD97A,#F6B923 55%,rgba(201,143,11,.5));
+  box-shadow:0 0 18px -6px rgba(246,185,35,.7);animation:grow .9s cubic-bezier(.22,1,.36,1) both}
+.chart .lb{font-size:8.5px;color:var(--gray)}
+.topic-bar{margin-bottom:11px}
+.topic-bar .l{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:5px}
+.topic-bar .l span:first-child{color:rgba(255,248,233,.82)}
+.topic-bar .l b{color:var(--gold-l);font-weight:700}
+.mini-bar{height:5px;border-radius:99px;background:rgba(255,248,233,.1);overflow:hidden}
+.mini-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#1F7A6B,#F6B923)}
+.mini-bar.teal i{background:linear-gradient(90deg,#124E43,#2F9E7E)}
+.mini-bar.purple i{background:linear-gradient(90deg,#3A2A52,#8A6BB8)}
+.game-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,248,233,.06)}
+.game-row:last-child{border-bottom:0}
+.game-row img{width:36px;height:36px;border-radius:12px;object-fit:cover;object-position:50% 22%;border:1px solid var(--hair-soft)}
+.game-row .gr{flex:1;min-width:0}
+.game-row .gr .t{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.game-row .gr .d{font-size:9.5px;color:var(--gray)}
+.tagw{font-size:9.5px;padding:3px 9px;border-radius:99px;border:1px solid rgba(56,160,127,.4);color:#7FE4C3;background:rgba(56,160,127,.12)}
+.tagw.lose{border-color:rgba(230,83,53,.4);color:#FFB6A6;background:rgba(230,83,53,.12)}
+/* ---------- chat ---------- */
+.grp-head{display:flex;align-items:center;gap:12px;padding:12px;border-radius:19px;border:1px solid var(--hair-soft);background:var(--glass)}
+.grp-av{position:relative;width:56px;height:56px;flex:none}
+.grp-av img{position:absolute;width:32px;height:32px;border-radius:50%;object-fit:cover;object-position:50% 22%;
+  border:1px solid rgba(246,185,35,.45);box-shadow:0 4px 12px rgba(0,0,0,.5)}
+.grp-av img:nth-child(1){top:0;inset-inline-start:0;z-index:3}
+.grp-av img:nth-child(2){bottom:0;inset-inline-start:7px;z-index:2}
+.grp-av img:nth-child(3){top:9px;inset-inline-end:0;z-index:1}
+.chat{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.msg{max-width:82%;padding:10px 13px;border-radius:17px;font-size:12.5px;line-height:1.85;position:relative;
+  animation:rise .5s cubic-bezier(.22,1,.36,1) both}
+.msg .who{display:block;font-size:9.5px;margin-bottom:2px;opacity:.72}
+.msg .tm{display:block;font-size:8.5px;margin-top:3px;opacity:.45;text-align:end}
+.msg.them{align-self:flex-start;background:rgba(255,248,233,.07);border:1px solid rgba(255,248,233,.09);
+  border-start-start-radius:5px;color:rgba(255,248,233,.9)}
+.msg.me{align-self:flex-end;background:linear-gradient(160deg,rgba(246,185,35,.26),rgba(246,185,35,.1));
+  border:1px solid rgba(246,185,35,.32);border-start-end-radius:5px;color:#FFF4D9}
+.composer{position:sticky;bottom:0;display:flex;gap:8px;align-items:center;margin-top:16px;padding:8px;
+  border-radius:18px;border:1px solid var(--hair-soft);background:rgba(6,38,33,.82);backdrop-filter:blur(12px)}
+.composer input{flex:1;background:none;border:0;outline:none;color:var(--cream);font-family:inherit;font-size:12.5px;padding:8px 10px}
+.composer input::placeholder{color:rgba(139,145,136,.9)}
+.send{width:40px;height:40px;border-radius:13px;border:1px solid rgba(246,185,35,.4);display:grid;place-items:center;
+  background:linear-gradient(160deg,rgba(246,185,35,.22),rgba(246,185,35,.06));cursor:pointer;color:var(--gold)}
+.send svg{width:17px;height:17px}
+/* ---------- profile ---------- */
+.prof{position:relative;border-radius:25px;overflow:hidden;border:1px solid rgba(246,185,35,.32);
+  box-shadow:0 30px 64px -30px #000;aspect-ratio:1/1.05}
+.prof img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.prof .veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,56,47,.1) 35%,rgba(6,30,26,.94))}
+.prof .in{position:absolute;inset-inline:0;bottom:0;padding:16px;text-align:center}
+.prof .nm{font-size:21px;font-weight:800}
+.prof .rl{font-size:11px;color:var(--gold-l);opacity:.85;margin-top:2px}
+.badges{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.badge{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;border:1px solid var(--hair-soft);
+  background:var(--glass);color:var(--gold)}
+.badge svg{width:20px;height:20px}
+.badge.off{color:rgba(255,248,233,.2)}
+.badge.off svg{opacity:.5}
+.grp-card{display:flex;align-items:center;gap:11px;padding:12px;border-radius:17px;border:1px solid var(--hair-soft);
+  background:linear-gradient(120deg,rgba(31,122,107,.22),rgba(74,53,102,.16),rgba(8,56,47,.4));cursor:pointer}
+.grp-card .g-ic{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;flex:none;
+  border:1px solid var(--hair);background:rgba(6,40,34,.5);color:var(--gold)}
+.grp-card .g-ic svg{width:20px;height:20px}
+.prof-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+/* ---------- settings ---------- */
+.set-list{border-radius:18px;border:1px solid var(--hair-soft);background:var(--glass);overflow:hidden}
+.set{display:flex;align-items:center;gap:11px;width:100%;padding:14px;background:none;border:0;border-bottom:1px solid rgba(255,248,233,.06);
+  color:var(--cream);font-size:12.5px;cursor:pointer;text-align:start}
+.set:last-child{border-bottom:0}
+.set .si{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:none;
+  border:1px solid var(--hair-soft);background:rgba(246,185,35,.08);color:var(--gold)}
+.set .si svg{width:16px;height:16px}
+.set .sl{flex:1;min-width:0}
+.set .sl .v{display:block;font-size:10px;color:var(--gray);margin-top:1px}
+.set .ar{width:15px;height:15px;color:rgba(255,248,233,.3);transform:scaleX(-1)}
+.name-input{width:100%;margin-top:9px;padding:11px 13px;border-radius:13px;font-family:inherit;font-size:12.5px;
+  color:var(--cream);background:rgba(255,248,233,.05);border:1px solid var(--hair-soft);outline:none}
+.name-input:focus{border-color:rgba(246,185,35,.55)}
+/* ---------- toast ---------- */
+.toast{position:absolute;inset-inline:auto;bottom:104px;left:50%;transform:translate(-50%,16px);z-index:20;
+  padding:9px 16px;border-radius:99px;font-size:11.5px;color:#26332D;font-weight:700;white-space:nowrap;
+  background:linear-gradient(160deg,#FFE3A1,#F6B923);box-shadow:0 16px 34px -14px rgba(246,185,35,.85);
+  opacity:0;pointer-events:none;transition:.35s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+/* ---------- keyframes ---------- */
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes grow{from{transform:scaleY(.15);transform-origin:bottom}to{transform:scaleY(1);transform-origin:bottom}}
+@keyframes breathe{0%,100%{box-shadow:0 0 0 1px rgba(246,185,35,.45),0 10px 26px -12px rgba(246,185,35,.55)}
+  50%{box-shadow:0 0 0 2px rgba(246,185,35,.7),0 14px 34px -10px rgba(246,185,35,.8)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-    <div class="app-container">
-        <div class="header">
-            <h1>🚀 WebView App Template</h1>
-            <p>Your Android WebView app is ready!</p>
+<div class="stage">
+  <div class="device">
+    <div class="app" id="app">
+      <!-- ============ HOME ============ -->
+      <section class="view active" id="v-home">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <button class="uchip" data-go="profile">
+            <span class="uname" id="home-uname">آوا</span>
+            <img id="home-av" alt="آواتار کاربر" src="">
+          </button>
         </div>
-        
-        <div class="content">
-            <h2>Welcome to Your App</h2>
-            <p>This is a mobile-optimized web app running in Android WebView.</p>
-            
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <h3>Mobile Optimized</h3>
-                    <p>Responsive design that works on all devices.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Fast Loading</h3>
-                    <p>Local assets load instantly.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>Auto Updates</h3>
-                    <p>GitHub Actions builds APK automatically.</p>
-                </div>
-            </div>
-            
-            <button class="btn" onclick="showWelcome()">Get Started</button>
-        </div>
-    </div>
 
-    <script>
-        function showWelcome() {
-            alert('Welcome! Add your HTML/CSS/JS files to build your app.');
-        }
+        <p class="eyebrow">کتابخانه، دیشب یک راز تازه داشت</p>
+        <h1 class="h1" style="margin-top:7px">سلام <span id="home-name">آوا</span>،<br>آماده‌ای صفحه‌ها را ورق بزنی؟</h1>
+
+        <div class="hero" style="margin-top:16px">
+          <img data-img="hero" alt="کتاب باز شناور با نور طلایی" src="">
+          <div class="hero-tint"></div>
+          <span class="hero-badge"><span class="dot"></span> فصل تازه · کتابخانه‌ی نیمه‌شب</span>
+          <div class="hero-cap">
+            <div class="t">هر جلد، دری به یک راز</div>
+            <div class="d">۲۷ شخصیت · ۸ موضوع · مسیرهای تازه‌ی کشف</div>
+          </div>
+        </div>
+
+        <div class="modes">
+          <button class="mode mode-bot" data-mode="bot">
+            <span class="mode-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2 13.7 8 18.5 9.7 13.7 11.4 12 16.2 10.3 11.4 5.5 9.7 10.3 8 12 3.2Z"></path><path d="M18.2 15.4 19 17.6 21.2 18.4 19 19.2 18.2 21.4 17.4 19.2 15.2 18.4 17.4 17.6 18.2 15.4Z"></path></svg></span>
+            <span class="mode-body"><span class="t">بازی با ربات</span><span class="d">رقابت فکری در سایه‌ی کتابخانه</span></span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18 9 12l6-6"></path></svg>
+          </button>
+          <button class="mode mode-friend" data-mode="friend">
+            <span class="mode-ic"><span class="duo"><img data-img="w2" alt="" src=""><img data-img="m7" alt="" src=""></span></span>
+            <span class="mode-body"><span class="t">بازی دوستانه</span><span class="d">دو همسفر، یک راز مشترک</span></span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18 9 12l6-6"></path></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ============ AVATAR GALLERY ============ -->
+      <section class="view" id="v-avatars">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">گالری شخصیت‌ها</span>
+        </div>
+
+        <h1 class="h1">شخصیتت را انتخاب کن</h1>
+        <p class="sm muted" style="margin-top:3px">هر چهره، یک قصه‌ی متفاوت دارد.</p>
+
+        <div class="av-preview" style="margin-top:15px">
+          <img id="av-big" alt="پیش‌نمایش شخصیت" src="">
+          <div class="veil"></div>
+          <span class="ribbon">انتخاب شما</span>
+          <div class="meta">
+            <div><div class="nm" id="av-bigname">آوا</div><div class="sub" id="av-bigsub">کتابدار نسخه‌های خطی</div></div>
+            <span class="pill" id="av-bigtag">زن</span>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab" data-gender="men">مردان · ۲۳</button>
+          <button class="tab active" data-gender="women">زنان · ۱۲</button>
+        </div>
+        <div class="av-grid" id="av-grid"></div>
+
+        <div style="margin-top:18px">
+          <button class="btn btn-gold btn-block" id="av-confirm">تأیید انتخاب</button>
+        </div>
+        <p class="sm muted" style="text-align:center;margin-top:9px">انتخاب شما فقط برای نمایش ذخیره می‌شود.</p>
+      </section>
+
+      <!-- ============ OPPONENT ============ -->
+      <section class="view" id="v-opponent">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">هم‌بازی</span>
+        </div>
+
+        <h1 class="h1">هم‌بازی‌ات را برگزین</h1>
+        <p class="sm muted" style="margin-top:3px">هر کدام، بخشی از کتابخانه را بهتر می‌شناسند.</p>
+
+        <div class="av-grid" id="opp-grid" style="grid-template-columns:repeat(3,1fr);margin-top:16px"></div>
+
+        <div class="card" style="margin-top:16px;display:flex;align-items:center;gap:11px">
+          <img id="opp-mini" alt="هم‌بازی انتخاب‌شده" style="width:46px;height:46px;border-radius:14px;object-fit:cover;object-position:50% 22%;border:1px solid rgba(246,185,35,.4)" src="">
+          <div style="flex:1">
+            <div class="sm" style="color:rgba(255,248,233,.55)">هم‌بازی انتخاب‌شده</div>
+            <div class="h2" id="opp-name" style="font-size:14px">سیاوش</div>
+          </div>
+          <span class="pill" id="opp-tag">آماده</span>
+        </div>
+
+        <button class="btn btn-gold btn-block" style="margin-top:16px" data-go="waiting">ورود به اتاق انتظار</button>
+      </section>
+
+      <!-- ============ WAITING ============ -->
+      <section class="view" id="v-waiting">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">اتاق انتظار</span>
+        </div>
+
+        <div class="card" style="padding:22px 16px;text-align:center;position:relative;overflow:hidden;margin-top:6px">
+          <div style="position:absolute;inset:0;background:radial-gradient(60% 45% at 50% 12%,rgba(246,185,35,.18),transparent 70%);pointer-events:none"></div>
+          <p class="eyebrow" style="position:relative">میز آماده می‌شود</p>
+          <div class="row" style="justify-content:center;gap:16px;margin:20px 0 8px;position:relative">
+            <div style="text-align:center">
+              <img id="wait-me" alt="" style="width:82px;height:96px;border-radius:18px;object-fit:cover;object-position:50% 22%;border:1px solid rgba(246,185,35,.55);box-shadow:0 16px 34px -16px rgba(0,0,0,.9)" src="">
+              <div class="sm" style="margin-top:7px" id="wait-me-name">آوا</div>
+              <div style="font-size:9px;color:var(--gray)">شما</div>
+            </div>
+            <div style="align-self:center;display:grid;gap:5px;color:var(--gold)">
+              <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M4 7.5h6.5M4 12h4M14 7.5h6M16 12h4"></path><path d="M12 3.5v17"></path></svg>
+              <span style="font-size:9px;color:var(--gray);letter-spacing:.1em">راز</span>
+            </div>
+            <div style="text-align:center">
+              <img id="wait-opp" alt="" style="width:82px;height:96px;border-radius:18px;object-fit:cover;object-position:50% 22%;border:1px solid rgba(255,248,233,.22);filter:saturate(.85)" src="">
+              <div class="sm" style="margin-top:7px" id="wait-opp-name">سیاوش</div>
+              <div style="font-size:9px;color:var(--gold-l);opacity:.9">در حال ورود…</div>
+            </div>
+          </div>
+          <p class="sm muted" style="position:relative">هر دو نفر باید یک جلد را انتخاب کنند.</p>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="row between" style="margin-bottom:8px">
+            <span class="sm">آماده‌سازی میز کتاب</span><span class="sm gold">۷۰٪</span>
+          </div>
+          <div class="bar" style="margin:0"><i style="width:70%"></i></div>
+        </div>
+
+        <button class="btn btn-gold btn-block" style="margin-top:16px" data-go="topics">شروع بازی</button>
+        <button class="btn btn-ghost btn-block" style="margin-top:8px" data-go="home">بازگشت</button>
+      </section>
+
+      <!-- ============ TOPICS ============ -->
+      <section class="view" id="v-topics">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">انتخاب موضوع</span>
+        </div>
+
+        <h1 class="h1">از کدام قفسه شروع کنیم؟</h1>
+        <p class="sm muted" style="margin-top:3px">هر موضوع، زبانی متفاوت برای پرسیدن دارد.</p>
+
+        <div style="margin-top:16px">
+          <button class="topic selected" data-topic="all">
+            <span class="thumb"><img data-img="t1" alt="" src=""></span>
+            <span class="tx">
+              <span class="t">همه موضوعات</span>
+              <span class="d">ترکیبی از هشت قفسه‌ی کتابخانه</span>
+              <span class="tags"><span class="pill">۸ قفسه</span><span class="pill">سطح: آزاد</span></span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18 9 12l6-6"></path></svg>
+          </button>
+          <button class="topic" data-topic="philosophy">
+            <span class="thumb"><img data-img="t2" alt="" src=""></span>
+            <span class="tx">
+              <span class="t">فلسفه</span>
+              <span class="d">از غار افلاطون تا پرسش‌های بی‌پاسخ</span>
+              <span class="tags"><span class="pill">تفکر</span><span class="pill">۲۴ پرسش</span></span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18 9 12l6-6"></path></svg>
+          </button>
+          <button class="topic" data-topic="art">
+            <span class="thumb"><img data-img="t3" alt="" src=""></span>
+            <span class="tx">
+              <span class="t">هنر</span>
+              <span class="d">رنگ، قاب و نگاهِ هنرمند</span>
+              <span class="tags"><span class="pill">زیبایی‌شناسی</span><span class="pill">۱۸ پرسش</span></span>
+            </span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18 9 12l6-6"></path></svg>
+          </button>
+        </div>
+
+        <button class="btn btn-gold btn-block" style="margin-top:6px" id="topic-start">ورق زدن آغاز شود</button>
+      </section>
+
+      <!-- ============ CLUE MODE ============ -->
+      <section class="view" id="v-clues">
+        <div class="qtop">
+          <button class="btn btn-ghost btn-sm" data-go="home" style="padding:7px 10px">بازگشت</button>
+          <div class="qmode"><span class="g"></span> از سرنخ تا کتاب</div>
+          <div class="timer">
+            <svg viewBox="0 0 46 46"><circle class="tbg" cx="23" cy="23" r="19"></circle><circle class="tfg" cx="23" cy="23" r="19"></circle></svg>
+            <span>۰۱:۲۴</span>
+          </div>
+        </div>
+
+        <div class="row between" style="margin-bottom:9px">
+          <span class="qnum">پرسش <b>۳</b> از ۱۰</span>
+          <span class="qnum">قفسه‌ی فلسفه</span>
+        </div>
+        <div class="bar"><i style="width:30%"></i></div>
+
+        <div class="clues" id="clue-row">
+          <button class="clue revealed" data-clue="0"><span class="k">سرنخ ۱</span>در یونان باستان می‌نوشت</button>
+          <button class="clue active" data-clue="1"><span class="k">سرنخ ۲</span>شاگرد سقراط بود</button>
+          <button class="clue" data-clue="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="9.5" rx="2.5"></rect><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"></path></svg><span class="k">سرنخ ۳</span>قفل‌شده</button>
+        </div>
+
+        <div class="paper">
+          <p class="q">کدام فیلسوف، «غار» را نمادی برای شناختِ ناقصِ انسان از حقیقت دانست؟</p>
+          <p class="qsub">برای آشکارشدن سرنخ سوم، روی جایگاه آن بزنید</p>
+        </div>
+
+        <div class="opts" id="clue-opts">
+          <button class="opt" data-i="0" data-correct="1"><span class="k">الف</span>افلاطون<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></button>
+          <button class="opt" data-i="1"><span class="k">ب</span>ارسطو<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+          <button class="opt" data-i="2"><span class="k">پ</span>ایمانوئل کانت<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+          <button class="opt" data-i="3"><span class="k">ت</span>فردریش نیچه<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        </div>
+
+        <div class="feedback" id="clue-feedback">
+          <div class="tt"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3.5 14.4 9l5.6.5-4.3 3.7 1.3 5.5L12 15.8 7 18.7l1.3-5.5L4 9.5 9.6 9 12 3.5Z"></path></svg><span id="clue-fb-title">پاسخ درست</span></div>
+          <span id="clue-fb-text">افلاطون در «جمهور» غار را نمادی از شناختِ ناقص می‌داند؛ سایه‌ها تنها تصویری از حقیقت‌اند.</span>
+        </div>
+
+        <div class="row" style="gap:9px;margin-top:14px">
+          <button class="btn btn-ghost" style="flex:1" id="clue-reveal">سرنخ بیشتر</button>
+          <button class="btn btn-gold" style="flex:1.2" id="clue-next" disabled="">ادامه</button>
+        </div>
+      </section>
+
+      <!-- ============ BOOK MODE ============ -->
+      <section class="view" id="v-books">
+        <div class="qtop">
+          <button class="btn btn-ghost btn-sm" data-go="home" style="padding:7px 10px">بازگشت</button>
+          <div class="qmode"><span class="g"></span> از کتاب تا جواب</div>
+          <div class="timer">
+            <svg viewBox="0 0 46 46"><circle class="tbg" cx="23" cy="23" r="19"></circle><circle class="tfg" cx="23" cy="23" r="19" style="stroke-dashoffset:62"></circle></svg>
+            <span>۰۲:۰۵</span>
+          </div>
+        </div>
+
+        <div class="row between" style="margin-bottom:9px">
+          <span class="qnum">پرسش <b>۵</b> از ۱۰</span>
+          <span class="qnum">جلد دوم</span>
+        </div>
+        <div class="bar"><i style="width:50%"></i></div>
+
+        <div class="bookwrap">
+          <div class="book">
+            <img data-img="t2" alt="جلد کتاب" src="">
+            <div class="spine"></div>
+            <div class="title">اراده‌ی معطوف به قدرت</div>
+          </div>
+        </div>
+
+        <div class="paper">
+          <p class="q">این جلد را کدام اندیشمند نوشته است؟</p>
+          <p class="qsub">از روی نشانه‌های روی جلد و سرنخ‌ها انتخاب کن</p>
+        </div>
+
+        <div class="opts" id="book-opts">
+          <button class="opt" data-i="0" data-correct="1"><span class="k">الف</span>فردریش نیچه<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></button>
+          <button class="opt" data-i="1"><span class="k">ب</span>آرتور شوپنهاور<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+          <button class="opt" data-i="2"><span class="k">پ</span>مارتین هایدگر<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+          <button class="opt" data-i="3"><span class="k">ت</span>کارل گوستاو یونگ<svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+        </div>
+
+        <div class="feedback" id="book-feedback">
+          <div class="tt"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3.5 14.4 9l5.6.5-4.3 3.7 1.3 5.5L12 15.8 7 18.7l1.3-5.5L4 9.5 9.6 9 12 3.5Z"></path></svg><span>توضیح پاسخ</span></div>
+          <span>نیچه این مفهوم را در آثار پنج پرسش خود پروراند؛ شوپنهاور به «اراده‌ی زندگی» باور داشت، نه اراده‌ی قدرت.</span>
+        </div>
+
+        <div class="row" style="gap:9px;margin-top:14px">
+          <button class="btn btn-ghost" style="flex:1" data-go="topics">تغییر موضوع</button>
+          <button class="btn btn-gold" style="flex:1.2" id="book-next" disabled="">ادامه</button>
+        </div>
+      </section>
+
+      <!-- ============ RESULT ============ -->
+      <section class="view" id="v-result">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">پایان فصل</span>
+        </div>
+
+        <div class="variants" id="res-variants">
+          <button class="vchip active" data-variant="win">پیروزی</button>
+          <button class="vchip" data-variant="close">نتیجه‌ی نزدیک</button>
+          <button class="vchip" data-variant="friendly">پایان دوستانه</button>
+        </div>
+
+        <div class="res-hero">
+          <div class="res-frame"><img id="res-av" alt="آواتار بازیکن" src=""></div>
+        </div>
+        <div class="res-title">
+          <div class="t" id="res-title">پیروزی</div>
+          <div class="d" id="res-sub">راز این فصل، از آنِ تو بود</div>
+        </div>
+        <div class="res-score"><span class="n" id="res-score">۸۶</span><span class="p">٪</span></div>
+        <p class="sm" style="text-align:center;color:rgba(255,248,233,.6);max-width:270px;margin:0 auto" id="res-note">در هشت پرسش از ده پرسش، سرنخ‌ها را درست کنار هم گذاشتی.</p>
+
+        <div class="metrics" style="margin-top:16px">
+          <div class="metric"><div class="l"><span>دقت پاسخ‌ها</span><b id="m-acc">۸۶٪</b></div><div class="mini-bar"><i id="m-acc-b" style="width:86%"></i></div></div>
+          <div class="metric"><div class="l"><span>سرعت تصمیم</span><b id="m-spd">۷۸٪</b></div><div class="mini-bar teal"><i id="m-spd-b" style="width:78%"></i></div></div>
+          <div class="metric"><div class="l"><span>سرنخ‌های کشف‌شده</span><b id="m-clu">۲ از ۳</b></div><div class="mini-bar purple"><i style="width:66%"></i></div></div>
+        </div>
+
+        <div class="medals">
+          <div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 14.2 8.4 20 9l-4.4 3.8 1.4 5.7L12 15.6 7 18.5l1.4-5.7L4 9l5.8-.6L12 3Z"></path></svg><span class="lb">رازگشا</span></div>
+          <div class="medal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="3.4"></circle></svg><span class="lb">دقت</span></div>
+          <div class="medal off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v6a5 5 0 0 1-10 0V4Z"></path><path d="M7 6H4.5v2A3.5 3.5 0 0 0 8 11.5M17 6h2.5v2A3.5 3.5 0 0 1 16 11.5"></path><path d="M12 15v3M9 21h6"></path></svg><span class="lb">قهرمانی</span></div>
+        </div>
+
+        <div class="res-actions">
+          <button class="btn btn-gold" data-go="topics">بازی دوباره</button>
+          <button class="btn btn-ghost" data-go="home">بازگشت به خانه</button>
+        </div>
+      </section>
+
+      <!-- ============ RECORDS ============ -->
+      <section class="view" id="v-records">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">رکوردها</span>
+        </div>
+
+        <h1 class="h1">کارنامه‌ی کتابخانه</h1>
+        <p class="sm muted" style="margin-top:3px">آمار نمایشی · ۴ هفته‌ی گذشته</p>
+
+        <div class="stats" style="margin-top:15px">
+          <div class="stat"><div class="n">۲۴</div><div class="l">بازی</div></div>
+          <div class="stat"><div class="n">۱۷</div><div class="l">برد</div></div>
+          <div class="stat"><div class="n">۷۴٪</div><div class="l">دقت کل</div></div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="row between" style="margin-bottom:6px">
+            <span class="sm" style="font-weight:700">روند هفته</span>
+            <span class="pill">میانگین ۶۸٪</span>
+          </div>
+          <div class="chart">
+            <div class="col"><div class="bx" style="height:42%"></div><span class="lb">ش</span></div>
+            <div class="col"><div class="bx" style="height:64%"></div><span class="lb">ی</span></div>
+            <div class="col"><div class="bx" style="height:52%"></div><span class="lb">د</span></div>
+            <div class="col"><div class="bx" style="height:86%"></div><span class="lb">س</span></div>
+            <div class="col"><div class="bx" style="height:70%"></div><span class="lb">چ</span></div>
+            <div class="col"><div class="bx" style="height:94%"></div><span class="lb">پ</span></div>
+            <div class="col"><div class="bx" style="height:58%"></div><span class="lb">ج</span></div>
+          </div>
+        </div>
+
+        <div class="sec-head"><span class="t">پیشرفت موضوعی</span><button class="link" data-go="topics">تغییر موضوع</button></div>
+        <div class="card">
+          <div class="topic-bar"><div class="l"><span>فلسفه</span><b>۸۲٪</b></div><div class="mini-bar"><i style="width:82%"></i></div></div>
+          <div class="topic-bar"><div class="l"><span>تاریخ</span><b>۶۴٪</b></div><div class="mini-bar teal"><i style="width:64%"></i></div></div>
+          <div class="topic-bar"><div class="l"><span>روان‌شناسی</span><b>۵۱٪</b></div><div class="mini-bar purple"><i style="width:51%"></i></div></div>
+          <div class="topic-bar"><div class="l"><span>هنر</span><b>۷۳٪</b></div><div class="mini-bar"><i style="width:73%"></i></div></div>
+          <div class="topic-bar"><div class="l"><span>اخلاق و عرفان</span><b>۴۵٪</b></div><div class="mini-bar teal"><i style="width:45%"></i></div></div>
+          <div class="topic-bar"><div class="l"><span>معارف دینی</span><b>۶۰٪</b></div><div class="mini-bar"><i style="width:60%"></i></div></div>
+          <div class="topic-bar"><div class="l"><span>رسانه و ارتباطات</span><b>۳۸٪</b></div><div class="mini-bar purple"><i style="width:38%"></i></div></div>
+          <div class="topic-bar" style="margin-bottom:0"><div class="l"><span>ورزش</span><b>۲۹٪</b></div><div class="mini-bar teal"><i style="width:29%"></i></div></div>
+        </div>
+
+        <div class="sec-head"><span class="t">بازی‌های اخیر</span><button class="link" data-go="group">گروه</button></div>
+        <div class="card" style="padding:6px 14px">
+          <div class="game-row"><img id="g1" alt="" src=""><div class="gr"><div class="t">بازی با ربات · فلسفه</div><div class="d">دیشب · ۰۹:۴۰</div></div><span class="tagw">برد ۸۶٪</span></div>
+          <div class="game-row"><img id="g2" alt="" src=""><div class="gr"><div class="t">بازی دوستانه · هنر</div><div class="d">دو روز پیش · ۲۱:۱۵</div></div><span class="tagw lose">باخت ۵۲٪</span></div>
+          <div class="game-row"><img id="g3" alt="" src=""><div class="gr"><div class="t">بازی با ربات · تاریخ</div><div class="d">سه روز پیش · ۱۹:۰۲</div></div><span class="tagw">برد ۷۱٪</span></div>
+          <div class="game-row"><img id="g4" alt="" src=""><div class="gr"><div class="t">بازی دوستانه · روان‌شناسی</div><div class="d">هفته‌ی پیش · ۲۰:۳۰</div></div><span class="tagw">برد ۶۸٪</span></div>
+        </div>
+      </section>
+
+      <!-- ============ GROUP ============ -->
+      <section class="view" id="v-group">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">گروه</span>
+        </div>
+
+        <div class="grp-head">
+          <div class="grp-av"><img data-img="w3" alt="" src=""><img data-img="m4" alt="" src=""><img data-img="w8" alt="" src=""></div>
+          <div style="flex:1;min-width:0">
+            <div class="h2" style="font-size:15px">حلقه‌ی نیمه‌شب</div>
+            <div class="sm" style="color:var(--gray)">۶ عضو · ۲ نفر آنلاین · فصل سوم</div>
+          </div>
+          <span class="pill" style="border-color:rgba(246,185,35,.4);color:var(--gold-l)">رتبه ۳</span>
+        </div>
+
+        <div class="chat" id="chat">
+          <div class="msg them"><span class="who">سیاوش</span>بچه‌ها قفسه‌ی فلسفه امشب باز شد. سرنخ دومش سخت بود.<span class="tm">۲۰:۴۱</span></div>
+          <div class="msg me"><span class="who">شما</span>من از «تمثیل غار» رد شدم، ولی سرنخ سوم قفل ماند.<span class="tm">۲۰:۴۲</span></div>
+          <div class="msg them"><span class="who">مهسا</span>سومیش اشاره به یک مجسمه‌ی سنگی داشت. فکر کنم افلاطون است.<span class="tm">۲۰:۴۴</span></div>
+          <div class="msg them"><span class="who">سیاوش</span>امشب ساعت ۲۲ یک دور دوستانه می‌زنیم؟<span class="tm">۲۰:۴۵</span></div>
+        </div>
+
+        <div class="composer">
+          <input id="msg-input" placeholder="پیامی برای حلقه بنویس…">
+          <button class="send" id="msg-send" aria-label="ارسال">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transform:scaleX(-1)"><path d="m4 4 16 8-16 8 3.2-8L4 4Z"></path></svg>
+          </button>
+        </div>
+      </section>
+
+      <!-- ============ PROFILE ============ -->
+      <section class="view" id="v-profile">
+        <div class="topbar">
+          <button class="brand" data-go="home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">پروفایل</span>
+        </div>
+
+        <div class="prof">
+          <img id="prof-av" alt="آواتار پروفایل" src="">
+          <div class="veil"></div>
+          <div class="in">
+            <div class="nm" id="prof-name">آوا</div>
+            <div class="rl" id="prof-role">کتابدار نسخه‌های خطی</div>
+          </div>
+        </div>
+
+        <div class="badges">
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 14.2 8.4 20 9l-4.4 3.8 1.4 5.7L12 15.6 7 18.5l1.4-5.7L4 9l5.8-.6L12 3Z"></path></svg></div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H19v16.5H6.5A2.5 2.5 0 0 0 4 22V5.5Z"></path><path d="M8 8h7"></path></svg></div>
+          <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5v5l3 1.8"></path></svg></div>
+          <div class="badge off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6l7-3Z"></path></svg></div>
+        </div>
+
+        <button class="grp-card" style="width:100%;text-align:start;color:inherit" data-go="group">
+          <span class="g-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.2"></circle><circle cx="16.5" cy="10" r="2.4"></circle><path d="M3.5 19c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8"></path><path d="M16 14.6c2.4.2 4 1.8 4 4.4"></path></svg></span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700">حلقه‌ی نیمه‌شب</div>
+            <div class="sm" style="color:var(--gray)">۶ عضو · رتبه‌ی ۳ در فصل سوم</div>
+          </div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="transform:scaleX(-1);color:rgba(255,248,233,.35)"><path d="M15 18 9 12l6-6"></path></svg>
+        </button>
+
+        <div class="sec-head"><span class="t">پیشرفت موضوعی</span><span class="sm muted">۳ قفسه‌ی فعال</span></div>
+        <div class="card">
+          <div class="topic-bar"><div class="l"><span>فلسفه</span><b>۸۲٪</b></div><div class="mini-bar"><i style="width:82%"></i></div></div>
+          <div class="topic-bar"><div class="l"><span>هنر</span><b>۷۳٪</b></div><div class="mini-bar teal"><i style="width:73%"></i></div></div>
+          <div class="topic-bar" style="margin-bottom:0"><div class="l"><span>تاریخ</span><b>۶۴٪</b></div><div class="mini-bar purple"><i style="width:64%"></i></div></div>
+        </div>
+
+        <div class="prof-actions">
+          <button class="btn btn-gold" id="prof-edit">ویرایش نمایشی</button>
+          <button class="btn btn-ghost" data-go="avatars">تغییر آواتار</button>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS ============ -->
+      <section class="view" id="v-settings">
+        <div class="topbar">
+          <button class="brand" data-go=id"home">
+            <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.4C10.6 5.1 8.6 4.6 5 4.6v13.1c3.6 0 5.6.6 7 1.9 1.4-1.3 3.4-1.9 7-1.9V4.6c-3.6 0-5.6.5-7 1.8Z"></path><path d="M12 6.4v13.2"></path></svg></span>
+            <span><span class="brand-name">راز کتاب</span><span class="brand-sub">RAZ-E KETAB</span></span>
+          </button>
+          <span class="qnum">تنظیمات</span>
+        </div>
+
+        <h1 class="h1">تنظیمات</h1>
+        <p class="sm muted" style="margin-top:3px">همه‌چیز نمایشی است؛ هیچ داده‌ای ذخیره نمی‌شود.</p>
+
+        <div class="card" style="margin-top:15px;display:flex;align-items:center;gap:12px">
+          <img id="set-av" alt="" style="width:52px;height:52px;border-radius:16px;object-fit:cover;object-position:50% 22%;border:1px solid rgba(246,185,35,.42)" src="">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13.5px;font-weight:700" id="set-name-view">آوا</div>
+            <div class="sm" style="color:var(--gray)" id="set-role-view">کتابدار نسخه‌های خطی</div>
+          </div>
+          <span class="pill">فصلی ۳</span>
+        </div>
+
+        <div class="sec-head"><span class="t">شخصیت و نام</span></div>
+        <div class="set-list">
+          <button class="set" data-go="avatars">
+            <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3.6"></circle><path d="M5 20c0-3.4 3-5.6 7-5.6s7 2.2 7 5.6"></path></svg></span>
+            <span class="sl">تغییر آواتار<span class="v">۲۷ شخصیت در دسترس</span></span>
+            <svg class="ar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M15 18 9 12l6-6"></path></svg>
+          </button>
+          <div class="set" style="display:block;cursor:default">
+            <div class="row" style="gap:11px">
+              <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l3.5-1 10-10a2.5 2.5 0 0 0-3.5-3.5l-10 10L4 20Z"></path><path d="M13.5 6.5 17 10"></path></svg></span>
+              <span class="sl">ویرایش نام نمایشی<span class="v">مثل همیشه دیده می‌شود</span></span>
+            </div>
+            <input class="name-input" id="name-input" value="آوا" maxlength="18">
+          </div>
+        </div>
+
+        <div class="sec-head"><span class="t">برنامه</span></div>
+        <div class="set-list">
+          <div class="set" style="cursor:default">
+            <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M3.5 12h17M12 3.5c2.4 2.3 3.6 5.3 3.6 8.5s-1.2 6.2-3.6 8.5c-2.4-2.3-3.6-5.3-3.6-8.5S9.6 5.8 12 3.5Z"></path></svg></span>
+            <span class="sl">زبان<span class="v">فارسی · راست‌چین</span></span>
+          </div>
+          <div class="set" style="cursor:default">
+            <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3l4 3.5V6L7 9.5H4Z"></path><path d="M15.5 9a4 4 0 0 1 0 6"></path></svg></span>
+            <span class="sl">صدا و موسیقی<span class="v">ملایم · در حال پخش</span></span>
+          </div>
+          <div class="set" style="cursor:default">
+            <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 11v5M12 8h.01"></path></svg></span>
+            <span class="sl">درباره‌ی راز کتاب<span class="v">نسخه‌ی نمایشی ۱٫۱</span></span>
+          </div>
+        </div>
+
+      </section>
+
+      <nav class="nav" id="nav">
+        <button class="nav-i" data-go="records">
+          <svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4.5M19 20v-6"></path></svg>
+          <span>رکوردها</span>
+        </button>
+        <button class="nav-i" data-go="group">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"></circle><circle cx="16.6" cy="10.2" r="2.4"></circle><path d="M3.4 19.5c0-3.2 2.6-5 5.6-5s5.6 1.8 5.6 5"></path><path d="M16.2 14.8c2.3.3 3.9 2 3.9 4.7"></path></svg>
+          <span>گروه</span>
+        </button>
+        <div class="nav-c">
+          <button class="nav-i active" data-go="home">
+            <span class="ring"><svg viewBox="0home 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.1C10.5 4.8 8.4 4.3 4.8 4.3v13.4c3.6 0 5.7.5 7.2 1.8 1.5-1.3 3.6-1.8 7.2-1.8V4.3c-3.6 0-5.7.5-7.2 1.8Z"></path><path d="M12 6.1v13.4"></path></svg></span>
+            <span>خانه</span>
+          </button>
+        </div>
+        <button class="nav-i" data-go="profile">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.6"></circle><path d="M5.2 20c0-3.5 3-5.6 6.8-5.6s6.8 2.1 6.8 5.6"></path></svg>
+          <span>پروفایل</span>
+        </button>
+        <button class="nav-i" data-go="settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1"></circle><path d="M12 3.4v2.2M12 18.4v2.2M4.9 7.8l1.9 1.1M17.2 15.1l1.9 1.1M4.9 16.2l1.9-1.1M17.2 8.9l1.9-1.1"></path></svg>
+          <span>تنظیمات</span>
+        </button>
+      </nav>
+      <div class="toast" id="toast">ذخیره شد</div>
+    </div>
+  </div>
+</div>
+<script>
+(function () {
+  var B = 'https://media.base44.com/images/public/6adb973f200b5f71da414051/';
+  var P = 'https://i.postimg.cc/';
+    var IMG = {
+    hero: B + '5d3d67bd0_generated_image.png',
+    t1: B + 'ebb818b15_generated_image.png',
+    t2: B + 'a6a79e343_generated_image.png',
+    t3: B + '0c3fce313_generated_image.png',
+    m1: B + 'b1086f5e0_generated_image.png',
+    m2: B + '48950d761_generated_image.png',
+    m3: B + '542f906be_generated_image.png',
+    m4: B + '2f600fefd_generated_image.png',
+    m5: B + 'cfdfc8dd1_generated_image.png',
+    m6: B + '707d1ec26_generated_image.png',
+    m7: B + '28f2ca660_generated_image.png',
+    m8: B + '28a415a78_generated_image.png',
+    w1: B + '3be76df36_generated_image.png',
+    w2: B + '97c8aedf7_generated_image.png',
+    w3: B + 'e2924c538_generated_image.png',
+    /* ---- ۱۶ آواتار تازه ---- */
+    w4:  P + 'LsKyd332/Internet-20261023-002014-11.jpg',
+    w5:  P + 'W1J9fHrf/Internet-20261023-002014-10.jpg',
+    w6:  P + 'W1J9fHrG/Internet-20261023-002014-9.jpg',
+    w7:  P + 'SNPTdhXp/Internet-20261023-002014-8.jpg',
+    w8:  P + 'PJ36BG2y/Internet-20261023-002014-7.jpg',
+    w9:  P + '0QCX0KSh/Internet-20261023-002014-6.jpg',
+    w10: P + 'd0rxDxVV/Internet-20261023-002014-5.jpg',
+    w11: P + 'vZ1jwBRh/Internet-20261023-002014-4.jpg',
+    m9:  P + '7YtcRzRy/Internet-20261023-002014-12.jpg',
+    m10: P + 'VLkp4gDD/Internet-20261023-002014-13.jpg',
+    m11: P + 'tR58hwt0/Internet-20261023-002014-14.jpg',
+    m12: P + 'vTQjJtM8/Internet-20261023-002014-15.jpg',
+    m13: P + 'vBwCzdN8/Internet-20261023-002014-16.jpg',
+    m14: P + 'g0Zf804N/Internet-20261023-002014-17.jpg',
+    m15: P + 'wj7Kx2Np/Internet-20261023-002014-18.jpg',
+    m16: P + 'vBWwFmVr/Internet-20261023-002014-19.jpg',
+    /* ---- مردان تازه ---- */
+    m17: 'https://i.postimg.cc/BbC3GK3x/1792857915495.jpg',
+    m18: 'https://i.postimg.cc/kX4MdTVP/1792858370269-(1).jpg',
+    m19: 'https://i.postimg.cc/ncgxfpft/1792858192426.jpg',
+    m20: 'https://i.postimg.cc/Gt4fXT2t/1792858111319.jpg',
+    m21: 'https://i.postimg.cc/FFJ5bwJn/1792857993375.jpg',
+    m22: 'https://i.postimg.cc/RhmRH3HX/1792858488939-(1).jpg',
+    m23: 'https://i.postimg.cc/x8gKN6YS/1792858477253-(1).jpg',
+    /* ---- خانم تازه ---- */
+    m24: 'https://i.postimg.cc/43zHhWQH/file-00000000f3e8822fb5ac99ed0d9b3a55.png'
+  };
+
+    var AV = [
+    { id: 'm1', g: 'men', n: 'آرش', r: 'پژوهشگر فلسفه' },
+    { id: 'm2', g: 'men', n: 'بهزاد', r: 'میزبان شب‌های کتاب' },
+    { id: 'm3', g: 'men', n: 'کیوان', r: 'خط‌شناس نسخه‌ها' },
+    { id: 'm4', g: 'men', n: 'سیاوش', r: 'کتابدار بخش عینکی' },
+    { id: 'm5', g: 'men', n: 'رهام', r: 'مشاور نسخه‌های حقوقی' },
+    { id: 'm6', g: 'men', n: 'امید', r: 'طراح جلد و صحنه' },
+    { id: 'm7', g: 'men', n: 'پارسا', r: 'راهنمای گردشگران' },
+    { id: 'm8', g: 'men', n: 'داریوش', r: 'نگهبان آرشیو' },
+    { id: 'm9', g: 'women', n: 'یاسمن', r: 'ناقد ادبی' },
+    { id: 'm10', g: 'women', n: 'شیرین', r: 'جست‌وجوگر اسناد' },
+    { id: 'm11', g: 'women', n: 'هلیا', r: 'مترجم آثار کلاسیک' },
+    { id: 'm12', g: 'women', n: 'لیانا', r: 'امین آرشیو' },
+    { id: 'm13', g: 'women', n: 'نیلوفر', r: 'گوینده‌ی کتاب‌صوتی' },
+    { id: 'm14', g: 'women', n: 'الناز', r: 'پژوهشگر تاریخ' },
+    { id: 'm15', g: 'women', n: 'ترنم', r: 'کارگردان نمایش‌های کتابی' },
+    { id: 'm16', g: 'women', n: 'سارا', r: 'سردبیر مجله‌ی کتاب' },
+    { id: 'w1', g: 'women', n: 'آوا', r: 'کتابدار نسخه‌های خطی' },
+    { id: 'w2', g: 'women', n: 'مهسا', r: 'میزبان حلقه‌ی نیمه‌شب' },
+    { id: 'w3', g: 'women', n: 'رها', r: 'پژوهشگر اخلاق' },
+    { id: 'm24', g: 'women', n: 'نگار', r: 'مشاور مطالعه' },
+    { id: 'w4', g: 'men', n: 'کاوه', r: 'مترجم ادبیات' },
+    { id: 'w5', g: 'men', n: 'آرمان', r: 'داستان‌نویس شبانه' },
+    { id: 'w6', g: 'men', n: 'بورزو', r: 'نقاش مینیاتور' },
+    { id: 'w7', g: 'men', n: 'مهرداد', r: 'شاعر کتاب‌خانه' },
+    { id: 'w8', g: 'men', n: 'سهند', r: 'ویراستار کهن‌متون' },
+    { id: 'w9', g: 'men', n: 'فرهاد', r: 'راوی قصه‌های پارسی' },
+    { id: 'w10', g: 'men', n: 'رامین', r: 'مرمت‌گر نسخه‌های قدیمی' },
+    { id: 'w11', g: 'men', n: 'بابک', r: 'ستون‌نویس فرهنگ' },
+    { id: 'm17', g: 'men', n: 'سهیل', r: 'استاد بازی‌های کارتی' },
+    { id: 'm18', g: 'men', n: 'حامد', r: 'ناشر کتاب' },
+    { id: 'm19', g: 'men', n: 'محمد', r: 'دانشجوی ارشد روان‌شناسی' },
+    { id: 'm20', g: 'men', n: 'کیارش', r: 'رمان‌خوان حرفه‌ای' },
+    { id: 'm21', g: 'men', n: 'محمد', r: 'ثبت‌کننده‌ی اطلاعات کتاب‌ها' },
+    { id: 'm22', g: 'men', n: 'احمد', r: 'کتابدار و مدیریت‌خوانده' },
+    { id: 'm23', g: 'men', n: 'اسماعیل', r: 'کتاب‌شناس' }
+  ];
+  AV.forEach(function (a) { a.img = IMG[a.id]; });
+
+  var S = { view: 'home', gender: 'women', picked: 'w1', opp: 'm4', topic: 'all', mode: 'bot', variant: 'win', name: 'آوا' };
+
+  function q(s, c) { return (c || document).querySelector(s); }
+  function qa(s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); }
+  function fa(v) { return String(v).replace(/[0-9]/g, function (d) { return '۰۱۲۳۴۵۶۷۸۹'[+d]; }); }
+  function byId(id) { for (var i = 0; i < AV.length; i++) { if (AV[i].id === id) return AV[i]; } return null; }
+
+  var tEl = q('#toast'), tT;
+  function toast(msg) {
+    tEl.textContent = msg; tEl.classList.add('show');
+    clearTimeout(tT); tT = setTimeout(function () { tEl.classList.remove('show'); }, 1900);
+  }
+
+  function go(v) {
+    S.view = v;
+    qa('.view').forEach(function (s) { s.classList.toggle('active', s.id === 'v-' + v); });
+    qa('.nav-i').forEach(function (b) { b.classList.toggle('active', b.dataset.go === v); });
+    var sec = q('#v-' + v);
+    if (sec) sec.scrollTop = 0;
+    if (v === 'avatars') renderGrid();
+    if (v === 'opponent') renderOpp();
+    if (v === 'waiting') fillWaiting();
+    if (v === 'records') fillRecords();
+    if (v === 'result') { applyVariant(); q('#res-av').src = byId(S.picked).img; }
+  }
+
+  function refreshNames() {
+    ['home-name', 'prof-name', 'set-name-view', 'av-bigname'].forEach(function (id) {
+      var el = q('#' + id); if (!el) return;
+      if (id === 'av-bigname') { var a = byId(S.picked); el.textContent = a.n; return; }
+      el.textContent = S.name;
+    });
+    var u = q('#home-uname'); if (u) u.textContent = S.name;
+    var ni = q('#name-input'); if (ni && ni.value !== S.name) ni.value = S.name;
+  }
+
+  function refreshIdentity() {
+    var a = byId(S.picked);
+    var o = byId(S.opp) || byId('m4');
+    [['home-av', a], ['prof-av', a], ['set-av', a], ['wait-me', a], ['wait-me-name', a],
+     ['wait-opp', o], ['wait-opp-name', o], ['opp-mini', o], ['res-av', a]].forEach(function (p) {
+      var el = q('#' + p[0]); if (!el) return;
+      if (p[0].indexOf('name') > -1) el.textContent = p[1].n; else el.src = p[1].img;
+    });
+    q('#av-big').src = a.img;
+    q('#av-bigsub').textContent = a.r;
+    q('#av-bigtag').textContent = a.g === 'women' ? 'زن' : 'مرد';
+    q('#prof-role').textContent = a.r;
+    q('#set-role-view').textContent = a.r;
+    q('#opp-name').textContent = o.n;
+    refreshNames();
+  }
+
+  function setPreview(a) {
+    if (!a) return;
+    q('#av-big').src = a.img;
+    q('#av-bigname').textContent = a.n;
+    q('#av-bigsub').textContent = a.r;
+    q('#av-bigtag').textContent = a.g === 'women' ? 'زن' : 'مرد';
+  }
+
+  function tileHTML(a) {
+    return '<img src="' + a.img + '" alt="' + a.n + '">' +
+      '<span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>' +
+      '<span class="nm">' + a.n + '</span>';
+  }
+
+  function renderGrid() {
+    var grid = q('#av-grid');
+    qa('[data-gender]').forEach(function (t) { t.classList.toggle('active', t.dataset.gender === S.gender); });
+    grid.innerHTML = '';
+    AV.filter(function (a) { return a.g === S.gender; }).forEach(function (a) {
+      var b = document.createElement('button');
+      b.className = 'av-tile' + (S.picked === a.id ? ' selected' : '');
+      b.setAttribute('data-id', a.id);
+      b.innerHTML = tileHTML(a);
+      grid.appendChild(b);
+    });
+    setPreview(byId(S.picked));
+  }
+
+  function renderOpp() {
+    var grid = q('#opp-grid');
+    grid.innerHTML = '';
+    var myG = byId(S.picked).g;
+    var list = AV.filter(function (a) { return a.g !== myG; });
+    if (!list.length || !byId(S.opp) || byId(S.opp).g === myG) S.opp = list[0].id;
+    list.forEach(function (a) {
+      var b = document.createElement('button');
+      b.className = 'av-tile' + (S.opp === a.id ? ' selected' : '');
+      b.setAttribute('data-opp', a.id);
+      b.innerHTML = tileHTML(a);
+      grid.appendChild(b);
+    });
+    var o = byId(S.opp);
+    q('#opp-name').textContent = o.n;
+    q('#opp-mini').src = o.img;
+  }
+
+  function fillWaiting() {
+    var a = byId(S.picked), o = byId(S.opp);
+    q('#wait-me').src = a.img; q('#wait-me-name').textContent = a.n;
+    q('#wait-opp').src = o.img; q('#wait-opp-name').textContent = o.n;
+  }
+
+  function fillRecords() {
+    var ids = ['g1', 'g2', 'g3', 'g4'];
+    var opps = AV.filter(function (a) { return a.g !== byId(S.picked).g; });
+    ids.forEach(function (id, i) {
+      var el = q('#' + id); if (el) el.src = opps[i % opps.length].img;
+    });
+  }
+
+  /* ---------- result variants ---------- */
+  var VAR = {
+    win: { t: 'پیروزی', s: 'راز این فصل، از آنِ تو بود', n: 86, note: 'در هشت پرسش از ده پرسش، سرنخ‌ها را درست کنار هم گذاشتی.', acc: 86, spd: 78, medal: 2 },
+    close: { t: 'نتیجه‌ی نزدیک', s: 'یک پرسش تا گشودن راز', n: 52, note: 'تفاوت تنها یک سرنخ بود؛ دور بعد با دقت بیشتری ورق بزن.', acc: 52, spd: 64, medal: 1 },
+    friendly: { t: 'پایان دوستانه', s: 'راز را با هم ورق زدیم', n: 74, note: 'هیچ‌کس بازنده نبود؛ هر دو یک فصل تازه خواندیم.', acc: 74, spd: 69, medal: 2 }
+  };
+
+  function applyVariant() {
+    var v = VAR[S.variant];
+    q('#res-title').textContent = v.t;
+    q('#res-sub').textContent = v.s;
+    q('#res-score').textContent = fa(v.n);
+    q('#res-note').textContent = v.note;
+    q('#m-acc').textContent = fa(v.acc) + '٪';
+    q('#m-acc-b').style.width = v.acc + '%';
+    q('#m-spd').textContent = fa(v.spd) + '٪';
+    q('#m-spd-b').style.width = v.spd + '%';
+    qa('#res-variants .vchip').forEach(function (c) { c.classList.toggle('active', c.dataset.variant === S.variant); });
+    qa('.medal').forEach(function (m, i) { m.classList.toggle('off', i >= v.medal); });
+  }
+
+  /* ---------- wiring ---------- */
+  document.addEventListener('click', function (e) {
+    var el;
+    if ((el = e.target.closest('[data-go]'))) { go(el.dataset.go); return; }
+    if ((el = e.target.closest('[data-mode]'))) { S.mode = el.dataset.mode; go(S.mode === 'friend' ? 'opponent' : 'topics'); return; }
+    if ((el = e.target.closest('[data-gender]'))) {
+      S.gender = el.dataset.gender;
+      qa('[data-gender]').forEach(function (t) { t.classList.toggle('active', t === el); });
+      var first = AV.filter(function (a) { return a.g === S.gender; })[0];
+      if (byId(S.picked).g !== S.gender && first) S.picked = first.id;
+      renderGrid();
+      return;
+    }
+    if ((el = e.target.closest('[data-topic]'))) {
+      S.topic = el.dataset.topic;
+      qa('[data-topic]').forEach(function (t) { t.classList.toggle('selected', t === el); });
+      toast('موضوع: ' + q('.t', el).textContent);
+      return;
+    }
+    if ((el = e.target.closest('[data-variant]'))) { S.variant = el.dataset.variant; applyVariant(); return; }
+    if ((el = e.target.closest('#av-grid .av-tile[data-id]'))) {
+      S.picked = el.dataset.id;
+      qa('#av-grid .av-tile').forEach(function (t) { t.classList.toggle('selected', t === el); });
+      setPreview(byId(S.picked));
+      refreshIdentity();
+      return;
+    }
+    if ((el = e.target.closest('#opp-grid .av-tile[data-opp]'))) {
+      S.opp = el.dataset.opp;
+      qa('#opp-grid .av-tile').forEach(function (t) { t.classList.toggle('selected', t === el); });
+      renderOpp();
+      return;
+    }
+    if ((el = e.target.closest('.clue'))) {
+      if (el.classList.contains('revealed')) return;
+      revealNextClue();
+      return;
+    }
+  });
+
+  q('#av-confirm').addEventListener('click', function () {
+    var a = byId(S.picked);
+    refreshIdentity();
+    toast('آواتار ثبت شد · ' + a.n);
+    go('home');
+  });
+
+  q('#topic-start').addEventListener('click', function () {
+    go(S.mode === 'friend' ? 'books' : 'clues');
+  });
+
+  q('#prof-edit').addEventListener('click', function () {
+    go('settings');
+    setTimeout(function () { q('#name-input').focus(); }, 320);
+  });
+
+  /* ---------- clues ---------- */
+  var CLUE_TXT = ['در یونان باستان می‌نوشت', 'شاگرد سقراط بود', 'نامش در رساله‌ی «جمهور» آمده'];
+  var clueIdx = 2;
+
+  function revealNextClue() {
+    var slots = qa('.clue');
+    if (clueIdx >= slots.length) { toast('سرنخ دیگری نمانده'); return; }
+    var slot = slots[clueIdx];
+    slot.classList.remove('active', 'revealed');
+    slot.classList.add('revealed');
+    slot.innerHTML = '<span class="k">سرنخ ' + fa(clueIdx + 1) + '</span>' + CLUE_TXT[clueIdx];
+    clueIdx++;
+    var next = slots[clueIdx];
+    if (next) next.classList.add('active');
+    if (clueIdx >= slots.length) q('#clue-reveal').disabled = true;
+  }
+
+  q('#clue-reveal').addEventListener('click', revealNextClue);
+
+  var clueAnswered = false;
+  qa('#clue-opts .opt').forEach(function (o) {
+    o.addEventListener('click', function () {
+      if (clueAnswered) return;
+      qa('#clue-opts .opt').forEach(function (x) { x.classList.remove('selected'); });
+      o.classList.add('selected');
+      q('#clue-next').disabled = false;
+    });
+  });
+
+  q('#clue-next').addEventListener('click', function () {
+    if (!clueAnswered) {
+      var sel = q('#clue-opts .opt.selected');
+      if (!sel) { toast('یک گزینه را انتخاب کن'); return; }
+      clueAnswered = true;
+      qa('#clue-opts .opt').forEach(function (o) {
+        if (o.dataset.correct === '1') o.classList.add('correct');
+        else if (o === sel) o.classList.add('wrong');
+        o.classList.remove('selected');
+      });
+      q('#clue-feedback').classList.add('show');
+      var ok = sel.dataset.correct === '1';
+      q('#clue-fb-title').textContent = ok ? 'پاسخ درست' : 'پاسخ نادرست';
+      q('#clue-fb-text').textContent = ok
+        ? 'افلاطون در «جمهور» غار را نمادی از شناختِ ناقص می‌داند؛ سایه‌ها تنها تصویری از حقیقت‌اند.'
+        : 'پاسخ درست «افلاطون» بود؛ او در «جمهور» غار را نمادی از شناختِ ناقص دانست.';
+      this.textContent = 'ادامه';
+      this.disabled = false;
+      return;
+    }
+    go('result');
+  });
+
+  /* ---------- book mode ---------- */
+  var bookAnswered = false;
+  qa('#book-opts .opt').forEach(function (o) {
+    o.addEventListener('click', function () {
+      if (bookAnswered) return;
+      qa('#book-opts .opt').forEach(function (x) { x.classList.remove('selected'); });
+      o.classList.add('selected');
+      q('#book-next').disabled = false;
+    });
+  });
+
+  q('#book-next').addEventListener('click', function () {
+    if (!bookAnswered) {
+      var sel = q('#book-opts .opt.selected');
+      if (!sel) { toast('یک گزینه را انتخاب کن'); return; }
+      bookAnswered = true;
+      qa('#book-opts .opt').forEach(function (o) {
+        if (o.dataset.correct === '1') o.classList.add('correct');
+        else if (o === sel) o.classList.add('wrong');
+        o.classList.remove('selected');
+      });
+      q('#book-feedback').classList.add('show');
+      this.textContent = 'ادامه';
+      return;
+    }
+    go('result');
+  });
+
+  /* ---------- chat ---------- */
+  var chat = q('#chat');
+  function sendMsg() {
+    var inp = q('#msg-input');
+    var txt = (inp.value || '').trim();
+    if (!txt) return;
+    var d = document.createElement('div');
+    d.className = 'msg me';
+    d.innerHTML = '<span class="who">شما</span>' + txt.replace(/[<>&]/g, '') + '<span class="tm">الان</span>';
+    chat.appendChild(d);
+    inp.value = '';
+    var sec = q('#v-group');
+    setTimeout(function () { sec.scrollTop = sec.scrollHeight; }, 60);
+  }
+  q('#msg-send').addEventListener('click', sendMsg);
+  q('#msg-input').addEventListener('keydown', function (e) { if (e.key === 'Enter') sendMsg(); });
+
+  /* ---------- name ---------- */
+  q('#name-input').addEventListener('input', function () { S.name = this.value.slice(0, 18); refreshNames(); });
+  q('#name-input').addEventListener('change', function () { toast('نام نمایشی به‌روز شد'); });
+
+
+  /* ---------- boot ---------- */
+  qa('[data-img]').forEach(function (el) {
+    var k = el.getAttribute('data-img');
+    if (IMG[k]) el.src = IMG[k];
+  });
+  renderGrid();
+  renderOpp();
+  refreshIdentity();
+  applyVariant();
+  fillRecords();
+  q('#res-av').src = byId(S.picked).img;
+})();
+</script>
+<script type="text/plain" id="bank-raw">
+(نام کتاب: عادت‌های اتمی
+سرنخ ۱: تغییرات بزرگ همیشه از تصمیم‌های بزرگ شروع نمی‌شوند.
+سرنخ ۲: یک درصد بهتر شدن در هر روز، در طول زمان تفاوت چشمگیری ایجاد می‌کند.
+سرنخ ۳: نویسنده‌اش جیمز کلیر است و چهار قانون برای ساخت عادت‌های خوب معرفی می‌کند.
+پاسخ: عادت‌های اتمی
+توضیح: این کتاب توضیح می‌دهد چگونه با تغییرات کوچک، طراحی محیط و ساخت عادت‌های درست، رفتار خود را به‌تدریج تغییر دهیم. پیام اصلی آن این است که به‌جای تمرکز صرف بر هدف، روی سیستم‌ها و هویت فردی خود کار کنیم.
+
+نام کتاب: تفکر سریع و کند
+سرنخ ۱: ذهن انسان همیشه آن‌قدر که تصور می‌کند منطقی نیست.
+سرنخ ۲: گاهی بدون فکر کردن پاسخ می‌دهیم و گاهی برای تصمیم‌گیری به تلاش ذهنی نیاز داریم.
+سرنخ ۳: نویسنده‌اش روان‌شناس برنده جایزه نوبل اقتصاد است و دو سیستم فکری را بررسی می‌کند.
+پاسخ: تفکر سریع و کند
+توضیح: این کتاب نوشته دنیل کانمن است و دو شیوه تفکر را بررسی می‌کند: سیستم یک، سریع و شهودی؛ و سیستم دو، آهسته‌تر و تحلیلی. کتاب به شناخت سوگیری‌های ذهنی و بهتر تصمیم گرفتن کمک می‌کند.
+
+نام کتاب: انسان خردمند
+سرنخ ۱: برای شناخت دنیای امروز، باید داستان گذشته خودمان را بدانیم.
+سرنخ ۲: انقلاب شناختی و انقلاب کشاورزی از نقاط عطف داستان این کتاب‌اند.
+سرنخ ۳: عنوان انگلیسی آن Sapiens است و تاریخ بشر را از گذشته دور تا دوران مدرن روایت می‌کند.
+پاسخ: انسان خردمند
+توضیح: این کتاب به بررسی تاریخ گونه انسان، شکل‌گیری جوامع، گسترش باورهای مشترک و نقش پول، دین و نظام‌های اجتماعی در همکاری انسان‌ها می‌پردازد.
+
+نام کتاب: انسان خداگونه
+سرنخ ۱: اگر انسان بتواند محدودیت‌های طبیعی خود را تغییر دهد، چه اتفاقی می‌افتد؟
+سرنخ ۲: هوش مصنوعی، مهندسی زیستی و قدرت داده‌ها در مرکز بحث‌های آن قرار دارند.
+سرنخ ۳: عنوان انگلیسی آن Homo Deus است و آینده احتمالی بشر را بررسی می‌کند.
+پاسخ: انسان خداگونه
+توضیح: این کتاب نوشته یووال نوح هراری، درباره تلاش انسان برای غلبه بر مرگ، رنج و محدودیت‌های زیستی و پیامدهای فناوری‌های نوین است. همچنین ایده داده‌گرایی و خطرهای احتمالی پیشرفت فناوری را بررسی می‌کند.
+
+نام کتاب: ۲۱ درس برای قرن ۲۱
+سرنخ ۱: جهان امروز پر از اطلاعات است، اما فهمیدن آنچه واقعاً اهمیت دارد دشوارتر شده است.
+سرنخ ۲: اخبار جعلی، بحران هویت، تغییرات شغلی و فناوری از موضوعات مهم آن هستند.
+سرنخ ۳: این کتاب سومین اثر مشهور مجموعه هراری پس از انسان خردمند و انسان خداگونه است.
+پاسخ: ۲۱ درس برای قرن ۲۱
+توضیح: این کتاب به مسائل مهم دنیای معاصر، از هوش مصنوعی و آینده کار گرفته تا سیاست، آموزش، حقیقت و معنا می‌پردازد و خواننده را به تفکر نقادانه درباره چالش‌های امروز دعوت می‌کند.
+ 
+
+نام کتاب: عادت‌های اتمی
+ توضیح: کمک می‌کند با ساخت عادت‌های کوچک و ترک عادت‌های مخرب، تغییرات پایدار در زندگی ایجاد کنی و به اهداف بلندمدتت برسی. 
+نویسنده؟ الف) جیمز کلیر ✅ ب) چارلز داهیگ ج) مارک منسون د) دارن هاردی
+ ایده اصلی؟ الف) بهبود 1 درصدی روزانه ✅ ب) یک‌شبه پولدار شدن ج) خواب زیاد د) رژیم سخت
+ قانون اول؟ الف) آشکارش کن ✅ ب) پنهانش کن ج) فراموشش کن د) بخواب
+ سال انتشار؟ الف) 2018 ✅ ب) 2010 ج) 2020 د) 2000
+ مثال معروف؟ الف) تیم دوچرخه‌سواری بریتانیا ✅ ب) ناسا ج) رئال مادرید د) بارسلونا
+ هویت یعنی؟ الف) با هر عمل به خودت رای بده ✅ ب) شناسنامه ج) پاسپورت د) کارت ملی
+ محیط خوب یعنی؟ الف) محیط طراحی کن نه اراده ✅ ب) اراده قوی ج) تنبیه د) جایزه نقدی
+ زبان اصلی؟ الف) انگلیسی ✅ ب) فرانسوی ج) آلمانی د) فارسی
+ قانون دوم؟ الف) جذابش کن ✅ ب) زشتش کن ج) سختش کن د) گرانش کن
+ ژانر؟ الف) توسعه فردی ✅ ب) رمان ج) ترسناک د) تاریخی 
+نام کتاب: تفکر سریع و کند
+ توضیح: کمک می‌کند خطاهای ذهنی و سوگیری‌های فکری را بشناسی، تصمیم‌های آگاهانه‌تری بگیری و بفهمی ذهن چگونه قضاوت می‌کند و گاهی به نتیجه‌گیری اشتباه می‌رسد.
+ 
+نویسنده؟ الف) دنیل کانمن ✅ ب) جیمز کلیر ج) فروید د) یونگ
+ جایزه نویسنده؟ الف) نوبل اقتصاد ✅ ب) اسکار ج) پولیتزر د) گرمی
+ سیستم 1 چیست؟ الف) سریع و شهودی ✅ ب) کند و منطقی ج) خواب د) رویا
+ سیستم 2 چیست؟ الف) کند و منطقی ✅ ب) سریع ج) احساسی د) تنبل
+ سال انتشار؟ الف) 2011 ✅ ب) 2000 ج) 2020 د) 1990
+ اهل کدام کشور؟ الف) اسرائیل - آمریکا ✅ ب) ایران ج) فرانسه د) آلمان
+ موضوع اصلی؟ الف) خطاهای ذهن و تصمیم‌گیری ✅ ب) آشپزی ج) فوتبال د) نجوم
+ اثر لنگر یعنی؟ الف) اولین عدد روی تصمیم اثر دارد ✅ ب) لنگر کشتی ج) وزنه د) ترازو
+ زبان اصلی؟ الف) انگلیسی ✅ ب) عبری ج) فرانسوی د) آلمانی
+ ژانر؟ الف) روانشناسی و اقتصاد رفتاری ✅ ب) رمان ج) کودک د) شعر 
+نام کتاب: انسان خردمند
+ توضیح: کمک می‌کند تاریخ بشر، شکل‌گیری جوامع و باورها و عواملی را بشناسی که رفتار انسان و دنیای امروزی را شکل داده‌اند.
+ 
+نویسنده؟ الف) یووال نوح هراری ✅ ب) داهیگ ج) دایموند د) هاوکینگ
+ اهل کجاست؟ الف) اسرائیل ✅ ب) آمریکا ج) انگلیس د) فرانسه
+ نام انگلیسی کتاب؟ الف) Sapiens ✅ ب) Homo Deus ج) 21 Lessons د) Guns
+ سال انتشار؟ الف) 2011 ✅ ب) 2020 ج) 2000 د) 1990
+ انقلاب شناختی کی بود؟ الف) 70 هزار سال پیش ✅ ب) 10 سال پیش ج) 500 سال پیش د) دیروز
+ انقلاب کشاورزی؟ الف) 12 هزار سال پیش ✅ ب) 100 سال پیش ج) 1000 سال پیش د) 1 میلیون سال پیش
+ پول چیست از نظر کتاب؟ الف) داستان مشترک اعتباری ✅ ب) طلا ج) کاغذ د) سکه
+ شغل نویسنده؟ الف) مورخ ✅ ب) پزشک ج) مهندس د) خلبان
+ زبان اصلی؟ الف) عبری ✅ ب) انگلیسی ج) فارسی د) عربی
+ ژانر؟ الف) تاریخ انسان ✅ ب) رمان ج) ترسناک د) آشپزی 
+نام کتاب: انسان خداگونه
+ توضیح: کمک می‌کند بفهمی فناوری، هوش مصنوعی و مهندسی زیستی چگونه آیندهٔ انسان را تغییر می‌دهند و چه فرصت‌ها و خطرهایی پیش روی بشر قرار می‌گیرند.
+ 
+نویسنده؟ الف) یووال نوح هراری ✅ ب) کانمن ج) هاوزل د) کلیر
+ نام انگلیسی؟ الف) Homo Deus ✅ ب) Sapiens ج) 21 Lessons د) Brave New World
+ سال انتشار؟ الف) 2015 ✅ ب) 2010 ج) 2020 د) 2000
+ موضوع اصلی؟ الف) آینده انسان و تکنولوژی ✅ ب) گذشته غار ج) آشپزی د) فوتبال
+ داده‌گرایی یعنی؟ الف) پرستش داده و الگوریتم ✅ ب) پرستش خدا ج) پرستش پول د) پرستش طبیعت
+ دشمن آینده انسان؟ الف) مرگ و رنج ✅ ب) فضایی‌ها ج) دایناسور د) زلزله
+ جلد قبلی آن؟ الف) انسان خردمند ✅ ب) 21 درس ج) قدرت عادت د) راز
+ زبان اصلی؟ الف) عبری ✅ ب) فارسی ج) عربی د) فرانسوی
+ انسان خداگونه یعنی؟ الف) ارتقای انسان با علم ✅ ب) خدا شدن واقعی ج) جادو د) افسانه
+ ژانر؟ الف) آینده‌پژوهی ✅ ب) کودک ج) شعر د) نمایشنامه 
+نام کتاب: 21 درس برای قرن 21
+ توضیح: کمک می‌کند مسائل مهم دنیای امروز، از هوش مصنوعی و اخبار جعلی تا سیاست و هویت، را بهتر درک کنی و برای مواجهه با چالش‌های قرن بیست‌ویکم آگاهانه‌تر تصمیم بگیری.
+ 
+نویسنده؟ الف) یووال نوح هراری ✅ ب) هرمن ملویل ج) تولستوی د) اورول
+ سال انتشار؟ الف) 2018 ✅ ب) 2010 ج) 2000 د) 2022
+ موضوع اصلی؟ الف) چالش‌های امروز: کار، آزادی، هوش مصنوعی ✅ ب) دایناسور ج) آشپزی د) فوتبال
+ تهدید شغلی آینده؟ الف) هوش مصنوعی و اتوماسیون ✅ ب) باران ج) برف د) گرما
+ فصل معروف؟ الف) کار، آزادی، آموزش ✅ ب) جادو ج) جن د) پری
+ جلدهای قبلی؟ الف) خردمند و خداگونه ✅ ب) راز و قدرت ج) هری پاتر د) ارباب حلقه‌ها
+ توصیه برای آموزش؟ الف) انعطاف و یادگیری مداوم ✅ ب) حفظ کردن ج) خوابیدن د) فرار
+ زبان اصلی؟ الف) عبری ✅ ب) فارسی ج) عربی د) ترکی
+ شغل نویسنده؟ الف) مورخ و فیلسوف ✅ ب) فوتبالیست ج) بازیگر د) آشپز
+ ژانر؟ الف) جامعه و سیاست روز ✅ ب) رمان ج) ترسناک د) کودک)
+</script>
+
+<script>
+(function () {
+  /* ---------- تنظیمات قابل تغییر ---------- */
+  var CFG = {
+    clueT: 30,
+    reveal: [8, 16],
+    qT: 15,
+    per: 3,
+    botP: [0.45, 0.65, 0.85],
+    botBook: 0.7
+  };
+
+  var $ = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return [].slice.call((c || document).querySelectorAll(s)); };
+  var FA = '۰۱۲۳۴۵۶۷۸۹';
+  function fa(v) { return String(v).replace(/[0-9]/g, function (d) { return FA[+d]; }); }
+  function norm(s) { return s.replace(/[۰-۹]/g, function (d) { return FA.indexOf(d); }).replace(/[\u200c\u200f\s]/g, '').replace(/ي/g, 'ی').replace(/ك/g, 'ک'); }
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  /* ---------- خواندن بانک سوال ---------- */
+  function parse(raw) {
+    var map = {}, order = [], cur = null, hasClue = false;
+    raw.split(/\r?\n/).forEach(function (l) {
+      l = l.trim(); if (!l) return;
+      var m = l.match(/^نام کتاب\s*[:：]\s*(.+)$/);
+      if (m) {
+        var k = norm(m[1]);
+        cur = map[k] || (map[k] = { name: fa(m[1].trim()), clues: [], qs: [] });
+        if (order.indexOf(k) < 0) order.push(k);
+        hasClue = false; return;
+      }
+      if (!cur) return;
+      if ((m = l.match(/^سرنخ\s*[۱-۳1-3]\s*[:：]\s*(.+)$/))) { cur.clues.push(m[1].trim()); hasClue = true; return; }
+      if ((m = l.match(/^توضیح\s*[:：]\s*(.+)$/))) { if (hasClue) cur.dc = m[1].trim(); else cur.dq = m[1].trim(); return; }
+      m = l.match(/^(.*?؟)\s*الف\)(.*?)ب\)(.*?)ج\)(.*?)د\)(.*)$/);
+      if (m) {
+        var raws = m.slice(2, 6), ci = -1;
+        raws.forEach(function (x, i) { if (x.indexOf('✅') > -1) ci = i; });
+        if (ci > -1) cur.qs.push({ q: fa(m[1].trim()), o: raws.map(function (x) { return fa(x.replace('✅', '').trim()); }), c: ci });
+      }
+    });
+    return order.map(function (k) { return map[k]; });
+  }
+  var BOOKS = parse($('#bank-raw').textContent);
+
+  /* ---------- استایل نوبت‌ها (افزودنی) ---------- */
+  var st = document.createElement('style');
+  st.textContent = '#raz-ov{position:absolute;inset:0;z-index:15;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(4,22,18,.94);backdrop-filter:blur(10px);overflow-y:auto}' +
+    '#raz-ov .box{width:100%;text-align:center}' +
+    '#raz-ov .av{width:92px;height:106px;border-radius:20px;object-fit:cover;object-position:50% 22%;border:1px solid rgba(246,185,35,.55);margin:0 auto 12px;box-shadow:0 20px 40px -18px #000}' +
+    '#raz-ov .rw{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;margin-top:8px;border-radius:14px;border:1px solid var(--hair-soft);background:var(--glass);font-size:12.5px}';
+  document.head.appendChild(st);
+
+  /* ---------- ابزار صفحه ---------- */
+  var G = null, LOCK = '<rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>';
+  function ov(h) { var o = $('#raz-ov'); if (!o) { o = document.createElement('div'); o.id = 'raz-ov'; $('#app').appendChild(o); } o.innerHTML = h; o.style.display = 'flex'; }
+  function ovOff() { var o = $('#raz-ov'); if (o) o.style.display = 'none'; }
+  function botName() { return $('#opp-name').textContent || 'حریف'; }
+  function botImg() { return $('#opp-mini').src; }
+  function meImg() { return $('#home-av').src; }
+  function strip(id) { var e = $(id), c = e.cloneNode(true); e.parentNode.replaceChild(c, e); return c; }
+  var EXIT = '<button class="btn btn-ghost btn-block" data-go="home" style="margin-top:8px">خروج از بازی</button>';
+
+  strip('#clue-next'); strip('#book-next');
+  $('#clue-reveal').style.display = 'none'; $('#clue-next').style.flex = '1';
+  $('#v-clues').addEventListener('click', function (e) { if (e.target.closest('.clue')) e.stopPropagation(); }, true);
+  $('#res-variants').style.display = 'none';
+
+  /* ---------- ساخت سوال‌ها ---------- */
+  function mkC(b) {
+    var others = shuffle(BOOKS.filter(function (x) { return x !== b; })).slice(0, 3);
+    return { b: b, txt: 'این سرنخ‌ها مربوط به کدام کتاب است؟', desc: b.dc || b.dq || '',
+      opts: shuffle([{ t: b.name, ok: 1 }].concat(others.map(function (x) { return { t: x.name, ok: 0 }; }))) };
+  }
+  function mkQ(b, x) {
+    return { b: b, txt: x.q, desc: b.dq || b.dc || '',
+      opts: shuffle(x.o.map(function (t, i) { return { t: t, ok: i === x.c ? 1 : 0 }; })) };
+  }
+
+  function startGame() {
+    var mode = $('#v-clues').classList.contains('active') ? 'clue' : $('#v-books').classList.contains('active') ? 'book' : null;
+    if (!mode) return;
+    if (G) abort();
+    var pool = BOOKS.filter(function (b) { return mode === 'clue' ? b.clues.length >= 3 : b.qs.length >= CFG.per; });
+    if (!pool.length || (mode === 'clue' && BOOKS.length < 4)) {
+      ov('<div class="box"><div class="h1">بانک سوال کافی نیست</div><p class="sm muted" style="margin:8px 0 16px">متن بانک را بین تگ bank-raw بچسبانید.</p>' + EXIT + '</div>'); return;
+    }
+    var sh = shuffle(pool), sets = [];
+    for (var s = 0; s < 2; s++) {
+      var qs = [], b;
+      if (mode === 'clue') { for (var k = 0; k < CFG.per; k++) qs.push(mkC(sh[(s * CFG.per + k) % sh.length])); }
+      else { b = sh[s % sh.length]; qs = shuffle(b.qs).slice(0, CFG.per).map(function (x) { return mkQ(b, x); }); }
+      sets.push({ qs: qs, order: s ? ['bot', 'me'] : ['me', 'bot'] });
+    }
+    G = { mode: mode, sets: sets, si: 0, ti: 0, sc: { me: { c: 0, p: 0, t: 0, n: 0 }, bot: { c: 0, p: 0, t: 0, n: 0 } } };
+    nextTurn();
+  }
+  function abort() { if (G && G.iv) clearInterval(G.iv); G = null; ovOff(); }
+  setInterval(function () {
+    if (!G) return;
+    if (!$(G.mode === 'clue' ? '#v-clues' : '#v-books').classList.contains('active')) abort();
+  }, 300);
+
+  /* ---------- امتیاز ---------- */
+  function rec(w, ok, t, l) { var s = G.sc[w]; s.n++; s.t += t; if (ok) { s.c++; s.p += 100 + Math.round((l - t) / l * 50); } }
+
+  /* ---------- نوبت‌ها ---------- */
+  function nextTurn() {
+    if (!G) return;
+    if (G.si >= 2) return finishGame();
+    var s = G.sets[G.si], w = s.order[G.ti];
+    var after = function () { if (!G) return; G.ti++; if (G.ti > 1) { G.ti = 0; G.si++; } nextTurn(); };
+    if (w === 'me') intro(function () { run(s.qs, 0, after); }); else botTurn(s.qs, after);
+  }
+  function run(qs, i, cb) { if (!G) return; if (i >= qs.length) return cb(); ask(qs[i], i, qs.length, function () { run(qs, i + 1, cb); }); }
+
+  function intro(cb) {
+    var isC = G.mode === 'clue', second = G.ti === 1, q0 = G.sets[G.si].qs[0];
+    var info = isC ? fa(CFG.per) + ' کتاب؛ هر کدام ' + fa(CFG.clueT) + ' ثانیه، با سرنخ‌هایی که یکی‌یکی آشکار می‌شوند.'
+                   : fa(CFG.per) + ' پرسش درباره‌ی «' + esc(q0.b.name) + '»؛ هر پرسش ' + fa(CFG.qT) + ' ثانیه.';
+    if (second) info += ' ' + esc(botName()) + ' همین پرسش‌ها را قبلاً جواب داده است.';
+    ov('<div class="box"><img class="av" src="' + meImg() + '"><p class="eyebrow">دور ' + fa(G.si + 1) + ' از ۲ · نوبت شما</p>' +
+      '<div class="h1" style="margin:6px 0">آماده‌ای؟</div><p class="sm muted">' + info + '</p>' +
+      '<button class="btn btn-gold btn-block" id="rz-go" style="margin-top:18px">شروع</button>' + EXIT + '</div>');
+    $('#rz-go').onclick = function () { ovOff(); cb(); };
+  }
+
+  function botAns(mode) {
+    var c = mode === 'clue', t = c ? rnd(3, CFG.clueT - 1) : rnd(3, CFG.qT - 2);
+    var p = c ? (t < CFG.reveal[0] ? CFG.botP[0] : t < CFG.reveal[1] ? CFG.botP[1] : CFG.botP[2]) : CFG.botBook;
+    return { ok: Math.random() < p, t: t, l: c ? CFG.clueT : CFG.qT };
+  }
+  function botTurn(qs, cb) {
+    var g = G, rows = qs.map(function (q, i) {
+      return '<div class="rw"><span>پرسش ' + fa(i + 1) + '</span><span id="rz-r' + i + '" class="pill">در حال فکر کردن…</span></div>';
+    }).join('');
+    ov('<div class="box"><img class="av" src="' + botImg() + '"><p class="eyebrow">دور ' + fa(g.si + 1) + ' از ۲ · نوبت حریف</p>' +
+      '<div class="h1" style="margin:6px 0 12px">' + esc(botName()) + ' پاسخ می‌دهد</div>' + rows +
+      '<button class="btn btn-gold btn-block" id="rz-go" style="margin-top:18px" disabled>ادامه</button>' + EXIT + '</div>');
+    (function step(i) {
+      if (G !== g) return;
+      if (i >= qs.length) { var b = $('#rz-go'); b.disabled = false; b.onclick = function () { ovOff(); cb(); }; return; }
+      setTimeout(function () {
+        if (G !== g) return;
+        var a = botAns(g.mode); rec('bot', a.ok, a.t, a.l);
+        var e = $('#rz-r' + i); e.className = 'tagw' + (a.ok ? '' : ' lose');
+        e.textContent = (a.ok ? 'درست · ' : 'نادرست · ') + fa(Math.round(a.t)) + ' ثانیه';
+        step(i + 1);
+      }, 900 + Math.random() * 700);
+    })(0);
+  }
+
+  /* ---------- نوبت بازیکن ---------- */
+  function renderClues(b, n) {
+    $('#clue-row').innerHTML = [0, 1, 2].map(function (i) {
+      if (i < n) return '<div class="clue revealed"><span class="k">سرنخ ' + fa(i + 1) + '</span>' + esc(b.clues[i]) + '</div>';
+      return '<div class="clue' + (i === n ? ' active' : '') + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">' + LOCK + '</svg><span class="k">سرنخ ' + fa(i + 1) + '</span>قفل‌شده</div>';
+    }).join('');
+  }
+
+  function ask(q, i, n, done) {
+    var g = G, isC = g.mode === 'clue', V = isC ? '#v-clues' : '#v-books', l = isC ? CFG.clueT : CFG.qT;
+    var view = $(V), box = $(isC ? '#clue-opts' : '#book-opts'), fb = $(isC ? '#clue-feedback' : '#book-feedback'), nb = $(isC ? '#clue-next' : '#book-next');
+    var hd = $$('.row.between .qnum', view), bar = $('.bar i', view), tm = $('.timer span', view), tf = $('.tfg', view);
+    var letters = ['الف', 'ب', 'پ', 'ت'], answered = false, shown = -1, T0 = Date.now();
+    view.scrollTop = 0;
+    hd[0].innerHTML = 'پرسش <b>' + fa(i + 1) + '</b> از ' + fa(n);
+    hd[1].textContent = 'دور ' + fa(g.si + 1) + ' از ۲';
+    bar.style.width = (i / n * 100) + '%';
+    $('.paper .q', view).textContent = q.txt;
+    $('.paper .qsub', view).textContent = isC ? 'سرنخ‌ها یکی‌یکی آشکار می‌شوند؛ زودتر جواب بدهی، امتیاز بیشتری می‌گیری' : 'هر پرسش ' + fa(CFG.qT) + ' ثانیه فرصت دارد';
+    if (!isC) {
+      var cv = ['t1', 't2', 't3'].map(function (k) { return $('img[data-img="' + k + '"]').src; });
+      $('.book img').src = cv[BOOKS.indexOf(q.b) % 3];
+      $('.book .title').textContent = q.b.name;
+    }
+    fb.classList.remove('show');
+    nb.disabled = true; nb.textContent = i < n - 1 ? 'پرسش بعدی' : 'ادامه';
+    tf.style.transition = 'stroke-dashoffset .2s linear';
+    box.innerHTML = q.opts.map(function (o, k) {
+      return '<button class="opt" data-i="' + k + '"><span class="k">' + letters[k] + '</span><span>' + esc(o.t) + '</span><svg class="mk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></svg></button>';
+    }).join('');
+    box.onclick = function (e) { var o = e.target.closest('.opt'); if (o && !answered) finish(+o.dataset.i); };
+
+    g.iv = setInterval(function () {
+      var el = (Date.now() - T0) / 1000, rem = Math.max(0, l - el);
+      if (isC) { var c = el >= CFG.reveal[1] ? 3 : el >= CFG.reveal[0] ? 2 : 1; if (c !== shown) { shown = c; renderClues(q.b, c); } }
+      tm.textContent = '۰۰:' + fa(('0' + Math.ceil(rem)).slice(-2));
+      tf.style.strokeDashoffset = 119 * (1 - rem / l);
+      if (rem <= 0) finish(-1);
+    }, 100);
+
+    function finish(sel) {
+      if (answered) return; answered = true; clearInterval(g.iv);
+      var t = Math.min(l, (Date.now() - T0) / 1000), ok = sel > -1 && !!q.opts[sel].ok;
+      rec('me', ok, t, l);
+      $$('.opt', box).forEach(function (o, k) {
+        var mk = $('.mk', o);
+        if (q.opts[k].ok) { o.classList.add('correct'); mk.innerHTML = '<path d="M20 6 9 17l-5-5"/>'; }
+        else if (k === sel) { o.classList.add('wrong'); mk.innerHTML = '<path d="M18 6 6 18M6 6l12 12"/>'; }
+      });
+      if (isC) renderClues(q.b, 3);
+      var right = q.opts.filter(function (o) { return o.ok; })[0].t;
+      fb.innerHTML = '<div class="tt"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3.5 14.4 9l5.6.5-4.3 3.7 1.3 5.5L12 15.8 7 18.7l1.3-5.5L4 9.5 9.6 9 12 3.5Z"/></svg><span>' +
+        (ok ? 'پاسخ درست' : sel < 0 ? 'زمان تمام شد' : 'پاسخ نادرست') + '</span></div><span>' +
+        (ok ? '' : 'پاسخ درست: ' + esc(right) + '. ') + '«' + esc(q.b.name) + '» — ' + esc(q.desc) + '</span>';
+      fb.classList.add('show');
+      bar.style.width = ((i + 1) / n * 100) + '%';
+      nb.disabled = false;
+      nb.onclick = function () { if (G === g) done(); };
+      setTimeout(function () { nb.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, 250);
+    }
+  }
+
+  /* ---------- پایان و نتیجه ---------- */
+  function finishGame() {
+    var g = G; G = null;
+    setMode(g.mode === 'clue' ? 'book' : 'clue');
+    var m = g.sc.me, b = g.sc.bot, l = g.mode === 'clue' ? CFG.clueT : CFG.qT, bn = botName();
+    var d = (m.p - b.p) || (m.c - b.c) || (b.t - m.t), res = d > 0 ? 'win' : d < 0 ? 'lose' : 'draw';
+    var acc = Math.round(m.c / m.n * 100), spd = Math.max(0, Math.round(100 * (1 - m.t / m.n / l)));
+    var go = document.createElement('button'); go.setAttribute('data-go', 'result'); go.hidden = true;
+    $('#app').appendChild(go); go.click(); go.remove(); ovOff();
+    var T = { win: ['پیروزی', 'راز این فصل، از آنِ تو بود'], lose: ['این بار نشد', esc(bn) + ' یک قدم جلوتر بود'], draw: ['پایان دوستانه', 'دو همسفر، یک راز مشترک'] }[res];
+    $('#res-title').textContent = T[0]; $('#res-sub').innerHTML = T[1];
+    $('#res-score').textContent = fa(acc);
+    $('#res-note').textContent = fa(m.c) + ' پاسخ درست از ' + fa(m.n) + '؛ امتیاز تو ' + fa(m.p) + ' و امتیاز ' + bn + ' ' + fa(b.p) + ' شد.';
+    $('#m-acc').textContent = fa(acc) + '٪'; $('#m-acc-b').style.width = acc + '%';
+    $('#m-spd').textContent = fa(spd) + '٪'; $('#m-spd-b').style.width = spd + '%';
+    var mt = $('#m-clu').closest('.metric');
+    $('.l span', mt).textContent = 'امتیاز تو در برابر حریف';
+    $('#m-clu').textContent = fa(m.p) + ' : ' + fa(b.p);
+    $('.mini-bar i', mt).style.width = (m.p + b.p ? Math.round(m.p / (m.p + b.p) * 100) : 50) + '%';
+    var on = [res === 'win', acc >= 66, res === 'win' && acc >= 83];
+    $$('.medal').forEach(function (e, i) { e.classList.toggle('off', !on[i]); });
+  }
+
+    /* ---------- انتخاب حالت بازی ---------- */
+  var NEXT = 'clue';
+  var sel = document.createElement('div');
+  sel.innerHTML = '<p class="sm muted" style="margin-top:14px">حالت بازی</p>' +
+    '<div class="tabs" style="margin:8px 0 6px">' +
+    '<button class="tab active" data-rz="clue">از سرنخ تا کتاب</button>' +
+    '<button class="tab" data-rz="book">از کتاب تا جواب</button></div>' +
+    '<p class="sm muted" style="margin-bottom:10px">بعد از هر بازی، حالت بعدی خودکار عوض می‌شود.</p>';
+  var ts = $('#topic-start'); ts.parentNode.insertBefore(sel, ts);
+
+  function setMode(m) {
+    NEXT = m;
+    $$('[data-rz]').forEach(function (t) { t.classList.toggle('active', t.dataset.rz === m); });
+  }
+  sel.addEventListener('click', function (e) { var t = e.target.closest('[data-rz]'); if (t) setMode(t.dataset.rz); });
+
+  function nav(v) {
+    var b = document.createElement('button'); b.setAttribute('data-go', v); b.hidden = true;
+    $('#app').appendChild(b); b.click(); b.remove();
+  }
+  $('#topic-start').addEventListener('click', function () {
+    nav(NEXT === 'clue' ? 'clues' : 'books');
+    setTimeout(startGame, 0);
+  });
+
+  /* ---------- اسم کتاب بالاتر و خوانا ---------- */
+  var st2 = document.createElement('style');
+  st2.textContent = '#v-books .book .title{top:7%;z-index:2;font-size:12.5px}' +
+    '#v-books .book::after{content:"";position:absolute;inset:0 0 auto 0;height:50%;z-index:1;pointer-events:none;' +
+    'background:linear-gradient(180deg,rgba(4,22,18,.9),rgba(4,22,18,0))}';
+  document.head.appendChild(st2);
+    /* ---------- رکوردزنی ---------- */
+  var LV = 3, BATCH = 3, KEY = 'raz_records';
+  var REC = (function () {
+    try { var r = JSON.parse(localStorage.getItem(KEY)); if (r) return r; } catch (e) {}
+    return { runs: 0, bp: 0, bc: 0, tc: 0, tq: 0 };
+  })();
+  function rsave() { try { localStorage.setItem(KEY, JSON.stringify(REC)); } catch (e) {} }
+  function tz(msg) {
+    var t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(tz.t); tz.t = setTimeout(function () { t.classList.remove('show'); }, 1900);
+  }
+
+  // دکمه‌های داخل پنجره (خروج، رفتن به رکوردها) پنجره را ببندند
+  $('#app').addEventListener('click', function (e) {
+    if (e.target.closest('#raz-ov [data-go]')) { if (G) abort(); else ovOff(); }
+  });
+
+  // کارت «رکورد من»
+  $('#v-records .stats').insertAdjacentHTML('afterend',
+    '<div class="card" style="margin-top:12px"><div class="row between"><span class="sm" style="font-weight:700">رکورد من</span><span class="pill" id="rz-runs">۰ دور</span></div>' +
+    '<div class="stats" style="margin-top:10px">' +
+    '<div class="stat"><div class="n" id="rz-bp">۰</div><div class="l">بهترین امتیاز</div></div>' +
+    '<div class="stat"><div class="n" id="rz-bc">۰</div><div class="l">بیشترین درست</div></div>' +
+    '<div class="stat"><div class="n" id="rz-ac">۰٪</div><div class="l">دقت کل</div></div></div></div>');
+  function setRec() {
+    $('#rz-runs').textContent = fa(REC.runs) + ' دور';
+    $('#rz-bp').textContent = fa(REC.bp);
+    $('#rz-bc').textContent = fa(REC.bc);
+    $('#rz-ac').textContent = fa(REC.tq ? Math.round(REC.tc / REC.tq * 100) : 0) + '٪';
+  }
+  setRec();
+
+  // ردیف «همه موضوعات» و پیام «به‌زودی» برای بقیه
+  $('#v-records .topic-bar').parentNode.insertAdjacentHTML('afterbegin',
+        '<div class="topic-bar rz-all" style="padding-bottom:12px;border-bottom:1px dashed var(--hair)">' +
+    '<div class="l"><span style="color:var(--gold-l);font-weight:700">همه موضوعات <span class="pill" style="margin-inline-start:6px">شروع ◂</span></span><b id="rz-allp">۵۵٪</b></div>' +
+    '<div class="mini-bar"><i id="rz-allb" style="width:55%"></i></div></div>');
+  $$('#v-records .topic-bar').forEach(function (r) { r.style.cursor = 'pointer'; });
+  $('#v-records').addEventListener('click', function (e) {
+    var r = e.target.closest('.topic-bar'); if (!r) return;
+    if (r.classList.contains('rz-all')) recIntro(); else tz('به‌زودی فعال می‌شود');
+  });
+
+  function recIntro() {
+    if (G) abort();
+    ov('<div class="box"><img class="av" src="' + meImg() + '"><p class="eyebrow">رکوردزنی · همه موضوعات</p>' +
+      '<div class="h1" style="margin:6px 0">سه جان داری</div>' +
+      '<p class="sm muted">هر پاسخ غلط یا بی‌پاسخ یک جان می‌برد. با سومین غلط بازی تمام می‌شود و رکوردت خودکار ثبت می‌شود. بعد از هر ' + fa(BATCH) + ' سوال می‌توانی ادامه بدهی یا بایستی.</p>' +
+      '<button class="btn btn-gold btn-block" id="rz-m1" style="margin-top:18px">از سرنخ تا کتاب</button>' +
+      '<button class="btn btn-ghost btn-block" id="rz-m2" style="margin-top:8px">از کتاب تا جواب</button>' + EXIT + '</div>');
+    $('#rz-m1').onclick = function () { startRun('clue'); };
+    $('#rz-m2').onclick = function () { startRun('book'); };
+  }
+
+  function startRun(mode) {
+    var pool = mode === 'clue'
+      ? BOOKS.filter(function (b) { return b.clues.length >= 3; })
+      : [].concat.apply([], BOOKS.map(function (b) { return b.qs.map(function (x) { return { b: b, x: x }; }); }));
+    if (!pool.length || (mode === 'clue' && BOOKS.length < 4)) {
+      ov('<div class="box"><div class="h1">بانک سوال کافی نیست</div>' + EXIT + '</div>'); return;
+    }
+    ovOff(); nav(mode === 'clue' ? 'clues' : 'books');
+    G = { mode: mode, run: 1, si: 0, ti: 0, lives: LV, bag: [], last: null,
+          sc: { me: { c: 0, p: 0, t: 0, n: 0 }, bot: { c: 0, p: 0, t: 0, n: 0 } } };
+    G.make = function () {
+      if (!G.bag.length) { G.bag = shuffle(pool); if (G.bag[G.bag.length - 1] === G.last) G.bag.reverse(); }
+      var it = G.bag.pop(); G.last = it;
+      return mode === 'clue' ? mkC(it) : mkQ(it.b, it.x);
+    };
+    batch();
+  }
+
+  function head(g) {
+    var hd = $$('.row.between .qnum', $(g.mode === 'clue' ? '#v-clues' : '#v-books'));
+    hd[0].innerHTML = 'سوال <b>' + fa(g.sc.me.n + 1) + '</b>';
+    hd[1].textContent = 'جان: ' + '♥'.repeat(g.lives) + '♡'.repeat(LV - g.lives);
+  }
+
+  function batch() {
+    var g = G; if (!g) return;
+    (function step(i) {
+      if (G !== g) return;
+      if (i >= BATCH) return checkpoint();
+      var c0 = g.sc.me.c;
+      ask(g.make(), i, BATCH, function () {
+        if (g.sc.me.c === c0) g.lives--;
+        if (g.lives <= 0) return endRun(true, 'dead');
+        step(i + 1);
+      });
+      head(g);
+    })(0);
+  }
+
+  function rows(m, g) {
+    return '<div class="rw"><span>امتیاز</span><b>' + fa(m.p) + '</b></div>' +
+           '<div class="rw"><span>پاسخ درست</span><b>' + fa(m.c) + ' از ' + fa(m.n) + '</b></div>' +
+           '<div class="rw"><span>جان باقی‌مانده</span><b>' + '♥'.repeat(g.lives) + '♡'.repeat(LV - g.lives) + '</b></div>';
+  }
+
+  function checkpoint() {
+    var g = G, m = g.sc.me;
+    ov('<div class="box"><p class="eyebrow">' + fa(m.n) + ' سوال پشت سر</p><div class="h1" style="margin:6px 0 12px">ادامه می‌دهی؟</div>' + rows(m, g) +
+      '<button class="btn btn-gold btn-block" id="rz-c1" style="margin-top:18px">ادامه می‌دهم</button>' +
+      '<button class="btn btn-ghost btn-block" id="rz-c2" style="margin-top:8px">پایان و ثبت رکورد</button>' +
+      '<button class="btn btn-ghost btn-block" id="rz-c3" style="margin-top:8px">پایان بدون ثبت</button></div>');
+    $('#rz-c1').onclick = function () { ovOff(); batch(); };
+    $('#rz-c2').onclick = function () { endRun(true, 'stop'); };
+    $('#rz-c3').onclick = function () { endRun(false, 'stop'); };
+  }
+
+  function endRun(record, why) {
+    var g = G; G = null; if (g.iv) clearInterval(g.iv);
+    var m = g.sc.me, isBest = false;
+    if (record) {
+      REC.runs++; REC.tc += m.c; REC.tq += m.n;
+      if (m.p > REC.bp) { REC.bp = m.p; isBest = true; }
+      if (m.c > REC.bc) REC.bc = m.c;
+      rsave(); setRec();
+          var p = REC.tq ? Math.round(REC.tc / REC.tq * 100) : 55;
+    var ap = $('#rz-allp');
+    if (ap) { ap.textContent = fa(p) + '٪'; $('#rz-allb').style.width = p + '%'; }
+    }
+    ov('<div class="box"><p class="eyebrow">' + (why === 'dead' ? 'جان‌هایت تمام شد' : 'رکوردزنی تمام شد') + '</p>' +
+      '<div class="h1" style="margin:6px 0 12px">' + (!record ? 'این دور ثبت نشد' : isBest ? 'رکورد تازه ثبت شد' : 'آمار ثبت شد') + '</div>' + rows(m, g) +
+      '<button class="btn btn-gold btn-block" id="rz-e1" style="margin-top:18px">دوباره رکورد بزن</button>' +
+      '<button class="btn btn-ghost btn-block" data-go="records" style="margin-top:8px">رفتن به رکوردها</button></div>');
+    $('#rz-e1').onclick = recIntro;
+}
+    /* ---------- گروه: پیش‌نمایش چت + نبرد گروهی ---------- */
+  var GN = 10, GDRAW = 5, GM = 'book', gi = 0, OPPN = '';
+  var OPPS = ['نگهبانان آرشیو', 'شب‌خوان‌های ری', 'قفسه‌ی هفتم'];
+  function im(k) { var e = $('img[data-img="' + k + '"]'); return e ? e.src : ''; }
+  function face(s) { return '<span class="gm-c"><img src="' + s + '" alt=""><u>✓</u></span>'; }
+
+  var st3 = document.createElement('style');
+  st3.textContent = '.gm-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:start}' +
+    '.gm-s{text-align:center}.gm-s .nm{font-size:13px;font-weight:800;line-height:1.5;min-height:40px}' +
+    '.gm-f{display:flex;justify-content:center;margin:8px 0 8px;padding-inline-start:8px}' +
+    '.gm-c{position:relative;width:36px;height:36px;margin-inline-start:-8px;border-radius:50%;border:1.5px solid rgba(246,185,35,.6);background:#0a3a31;display:grid;place-items:center;font-size:10px;color:var(--gold-l)}' +
+    '.gm-c img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:50% 22%}' +
+    '.gm-c u{position:absolute;bottom:-3px;inset-inline-end:-3px;width:15px;height:15px;border-radius:50%;background:#38A07F;color:#04241C;font-size:9px;text-decoration:none;display:grid;place-items:center;font-weight:900}' +
+    '.gm-c.me{border-style:dashed;background:rgba(246,185,35,.12)}' +
+    '.gm-v{align-self:center;font-weight:900;color:var(--gold);font-size:15px;padding-top:20px}';
+  document.head.appendChild(st3);
+
+  /* --- صفحه‌ی گروه: پیش‌نمایش چت و دو دکمه --- */
+  var gv = $('#v-group'), gchat = $('#chat'), gcomp = $('.composer', gv);
+  var hub = document.createElement('div');
+  hub.innerHTML = '<p class="sm muted" style="margin:16px 0 8px">پیش‌نمایش گفتگو</p>' +
+    '<div class="chat" id="gh-prev" style="margin-top:0"></div>' +
+    '<div class="row" style="gap:9px;margin-top:18px">' +
+    '<button class="btn btn-ghost" style="flex:1" data-gh="chat">ورود به چت</button>' +
+    '<button class="btn btn-gold" style="flex:1" data-gh="game">ورود به بازی</button></div>';
+  $('.grp-head', gv).insertAdjacentElement('afterend', hub);
+  var gback = document.createElement('button');
+  gback.className = 'btn btn-ghost btn-sm'; gback.style.marginTop = '14px';
+  gback.textContent = '◂ بازگشت به گروه'; gback.setAttribute('data-gh', 'hub');
+  gchat.insertAdjacentElement('beforebegin', gback);
+
+  function ghub(show) {
+    hub.style.display = show ? '' : 'none';
+    gback.style.display = show ? 'none' : '';
+    gchat.style.display = show ? 'none' : '';
+    gcomp.style.display = show ? 'none' : '';
+    if (show) $('#gh-prev').innerHTML = $$('.msg', gchat).slice(-2).map(function (m) { return m.outerHTML; }).join('');
+  }
+  ghub(true);
+  new MutationObserver(function () { if (gv.classList.contains('active')) ghub(true); })
+    .observe(gv, { attributes: true, attributeFilter: ['class'] });
+  gv.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-gh]'); if (!b) return;
+    var a = b.dataset.gh;
+    if (a === 'chat') ghub(false); else if (a === 'hub') ghub(true); else if (a === 'game') openMatch();
+  });
+
+  /* --- صفحه‌ی نبرد و صفحه‌ی نتیجه --- */
+  $('#nav').insertAdjacentHTML('beforebegin',
+    '<section class="view" id="v-gmatch">' +
+    '<div class="topbar"><button class="btn btn-ghost btn-sm" data-go="group">◂ بازگشت</button><span class="qnum">نبرد گروهی</span></div>' +
+    '<h1 class="h1">نبرد دو گروه</h1>' +
+    '<p class="sm muted" style="margin-top:3px">فقط بخش «همه موضوعات» برای تو باز مانده است.</p>' +
+    '<div class="card" style="margin-top:15px"><div class="gm-vs" id="gm-vs"></div></div>' +
+    '<div class="card" style="margin-top:12px"><div class="sm" style="font-weight:700;margin-bottom:5px">قانون برد</div><div class="sm muted" id="gm-rule"></div></div>' +
+    '<p class="sm muted" style="margin-top:16px">حالت بازی</p>' +
+    '<div class="tabs" style="margin:8px 0 14px"><button class="tab" data-gm="clue">از سرنخ تا کتاب</button><button class="tab" data-gm="book">از کتاب تا جواب</button></div>' +
+    '<button class="btn btn-gold btn-block" id="gm-start">شروع بازی من · همه موضوعات</button></section>' +
+
+    '<section class="view" id="v-gres">' +
+    '<div class="topbar"><span class="qnum">نتیجه‌ی نبرد گروهی</span><span></span></div>' +
+    '<div class="res-hero"><div class="res-frame"><img id="gr-av" alt="" src=""></div></div>' +
+    '<div class="res-title"><div class="t" id="gr-t"></div><div class="d" id="gr-s"></div></div>' +
+    '<div class="res-score"><span class="n" id="gr-n"></span><span class="p">از ' + fa(GN) + '</span></div>' +
+    '<p class="sm" style="text-align:center;color:rgba(255,248,233,.6)" id="gr-note"></p>' +
+    '<div class="card" style="margin-top:16px;padding:6px 14px" id="gr-rows"></div>' +
+    '<div class="res-actions" style="margin-top:22px"><button class="btn btn-gold" data-go="group">بازگشت به گروه</button>' +
+    '<button class="btn btn-ghost" id="gr-again">بازی دوباره</button></div></section>');
+
+  function setGM(m) { GM = m; $$('[data-gm]').forEach(function (t) { t.classList.toggle('active', t.dataset.gm === m); }); }
+  $('#v-gmatch').addEventListener('click', function (e) { var t = e.target.closest('[data-gm]'); if (t) setGM(t.dataset.gm); });
+  $('#gm-start').addEventListener('click', function () { startGroup(GM); });
+  $('#gr-again').addEventListener('click', function () { openMatch(); });
+
+  function openMatch() {
+    var ours = $('.grp-head .h2', gv).textContent;
+    OPPN = OPPS[gi % OPPS.length];
+    $('#gm-vs').innerHTML =
+      '<div class="gm-s"><div class="nm">' + esc(ours) + '</div><div class="gm-f">' + face(im('w3')) + face(im('m4')) + face(im('w8')) + '<span class="gm-c me">تو</span></div>' +
+      '<div class="sm muted">' + fa(5) + ' از ' + fa(6) + ' نفر بازی کرده‌اند</div><span class="pill" style="margin-top:7px;display:inline-block;color:var(--gold-l)">منتظر تو</span></div>' +
+      '<div class="gm-v">VS</div>' +
+      '<div class="gm-s"><div class="nm">' + esc(OPPN) + '</div><div class="gm-f">' + face(im('w2')) + face(im('m7')) + face(botImg()) + '</div>' +
+      '<div class="sm muted">' + fa(6) + ' از ' + fa(6) + ' نفر بازی کرده‌اند</div><span class="pill" style="margin-top:7px;display:inline-block">همه بازی کرده‌اند</span></div>';
+    $('#gm-rule').textContent = fa(GDRAW + 1) + ' پاسخ درست یا بیشتر از ' + fa(GN) + ' سوال = بردید · ' + fa(GDRAW) + ' پاسخ درست = مساوی · کمتر از ' + fa(GDRAW) + ' = باختید';
+    setGM(NEXT);
+    nav('gmatch');
+  }
+
+  /* --- بازی من در نبرد --- */
+  function gpool(mode) {
+    return mode === 'clue' ? BOOKS.filter(function (b) { return b.clues.length >= 3; })
+      : [].concat.apply([], BOOKS.map(function (b) { return b.qs.map(function (x) { return { b: b, x: x }; }); }));
+  }
+  function startGroup(mode) {
+    if (G) abort();
+    var pool = gpool(mode);
+    if (!pool.length || (mode === 'clue' && BOOKS.length < 4)) {
+      ov('<div class="box"><div class="h1">بانک سوال کافی نیست</div>' + EXIT + '</div>'); return;
+    }
+    ovOff(); nav(mode === 'clue' ? 'clues' : 'books');
+    G = { mode: mode, grp: 1, si: 0, ti: 0, bag: [], last: null,
+          sc: { me: { c: 0, p: 0, t: 0, n: 0 }, bot: { c: 0, p: 0, t: 0, n: 0 } } };
+    G.make = function () {
+      if (!G.bag.length) { G.bag = shuffle(pool); if (G.bag[G.bag.length - 1] === G.last) G.bag.reverse(); }
+      var it = G.bag.pop(); G.last = it;
+      return mode === 'clue' ? mkC(it) : mkQ(it.b, it.x);
+    };
+    gstep(0);
+  }
+  function gstep(i) {
+    var g = G; if (!g) return;
+    if (i >= GN) return gend();
+    ask(g.make(), i, GN, function () { gstep(i + 1); });
+    $$('.row.between .qnum', $(g.mode === 'clue' ? '#v-clues' : '#v-books'))[1].textContent = 'نبرد گروهی';
+  }
+
+  function gend() {
+    var g = G; G = null; if (g.iv) clearInterval(g.iv);
+    var c = g.sc.me.c, ours = $('.grp-head .h2', gv).textContent;
+    var res = c > GDRAW ? 'win' : c === GDRAW ? 'draw' : 'lose';
+    var T = { win: ['بردید!', ours + ' از ' + OPPN + ' جلو افتاد'],
+              draw: ['مساوی شد', ours + ' و ' + OPPN + ' هم‌امتیاز شدند'],
+              lose: ['باختید', OPPN + ' این بار جلوتر بود'] }[res];
+    $('#gr-av').src = meImg();
+    $('#gr-t').textContent = T[0]; $('#gr-s').textContent = T[1];
+    $('#gr-n').textContent = fa(c);
+    $('#gr-note').textContent = res === 'win' ? 'نتیجه‌ی گروه را تو رقم زدی.' : 'برای برد باید بیش از ' + fa(GDRAW) + ' پاسخ درست می‌دادی.';
+    var o = { win: ['برنده', 'بازنده'], draw: ['مساوی', 'مساوی'], lose: ['بازنده', 'برنده'] }[res];
+    function tag(bad, t) { return '<span class="tagw' + (bad ? ' lose' : '') + '">' + t + '</span>'; }
+    $('#gr-rows').innerHTML =
+      '<div class="game-row"><img src="' + meImg() + '" alt=""><div class="gr"><div class="t">' + esc(ours) + '</div><div class="d">گروه ما</div></div>' + tag(res === 'lose', o[0]) + '</div>' +
+      '<div class="game-row"><img src="' + botImg() + '" alt=""><div class="gr"><div class="t">' + esc(OPPN) + '</div><div class="d">گروه حریف</div></div>' + tag(res === 'win', o[1]) + '</div>';
+    gi++;
+    nav('gres');
+  }
+    /* ---------- نبرد گروهی: ۵ سوال سرنخی + ۵ سوال کتابی، یک مجموعه‌ی ثابت ---------- */
+  var GSET = [];
+  function buildSet() {
+    var cp = shuffle(gpool('clue')), bp = shuffle(gpool('book')), out = [], i, q;
+    if (!cp.length || !bp.length || BOOKS.length < 4) return [];
+    for (i = 0; i < 5; i++) { q = mkC(cp[i % cp.length]); q.kind = 'clue'; out.push(q); }
+    for (i = 0; i < 5; i++) { q = mkQ(bp[i % bp.length].b, bp[i % bp.length].x); q.kind = 'book'; out.push(q); }
+    return out;
+  }
+
+  function openMatch() {
+    GSET = buildSet();
+    var ours = $('.grp-head .h2', gv).textContent;
+    OPPN = OPPS[gi % OPPS.length];
+    $('#gm-vs').innerHTML =
+      '<div class="gm-s"><div class="nm">' + esc(ours) + '</div><div class="gm-f">' + face(im('w3')) + face(im('m4')) + face(im('w8')) + '<span class="gm-c me">تو</span></div>' +
+      '<div class="sm muted">' + fa(5) + ' از ' + fa(6) + ' نفر بازی کرده‌اند</div><span class="pill" style="margin-top:7px;display:inline-block;color:var(--gold-l)">منتظر تو</span></div>' +
+      '<div class="gm-v">VS</div>' +
+      '<div class="gm-s"><div class="nm">' + esc(OPPN) + '</div><div class="gm-f">' + face(im('w2')) + face(im('m7')) + face(botImg()) + '</div>' +
+      '<div class="sm muted">' + fa(6) + ' از ' + fa(6) + ' نفر بازی کرده‌اند</div><span class="pill" style="margin-top:7px;display:inline-block">همه بازی کرده‌اند</span></div>';
+    $('#gm-rule').textContent = fa(5) + ' سوال سرنخی و ' + fa(5) + ' سوال کتابی؛ ' + OPPN + ' دقیقاً همین ' + fa(GN) + ' سوال را جواب داده است. ' +
+      fa(GDRAW + 1) + ' پاسخ درست یا بیشتر = بردید · ' + fa(GDRAW) + ' = مساوی · کمتر = باختید';
+    nav('gmatch');
+  }
+
+  function startGroup() {
+    if (G) abort();
+    if (GSET.length < GN) {
+      ov('<div class="box"><div class="h1">بانک سوال کافی نیست</div>' + EXIT + '</div>'); return;
+    }
+    ovOff();
+    G = { mode: GSET[0].kind, grp: 1, si: 0, ti: 0, sc: { me: { c: 0, p: 0, t: 0, n: 0 }, bot: { c: 0, p: 0, t: 0, n: 0 } } };
+    gstep(0);
+  }
+
+  function gstep(i) {
+    var g = G; if (!g) return;
+    if (i >= GN) return gend();
+    var q = GSET[i], prev = g.mode;
+    g.mode = q.kind;
+    if (i === 0 || q.kind !== prev) nav(q.kind === 'clue' ? 'clues' : 'books');
+    ask(q, i, GN, function () { gstep(i + 1); });
+    $$('.row.between .qnum', $(q.kind === 'clue' ? '#v-clues' : '#v-books'))[1].textContent = 'نبرد گروهی';
+  }
+
+  // انتخاب حالت دیگر لازم نیست؛ تب‌ها پنهان شوند
+  var gtb = $('#v-gmatch .tabs'); gtb.style.display = 'none'; gtb.previousElementSibling.style.display = 'none';
+    /* ---------- صدای هیجان‌انگیز ---------- */
+  var SND = true, AC = null;
+  try { SND = localStorage.getItem('raz_sound') !== '0'; } catch (e) {}
+  function ac() {
+    if (!AC) { var C = window.AudioContext || window.webkitAudioContext; if (!C) return null; AC = new C(); }
+    if (AC.state === 'suspended') AC.resume();
+    return AC;
+  }
+  ['pointerdown', 'keydown'].forEach(function (ev) { document.addEventListener(ev, ac, { passive: true }); });
+
+  function beep(f, d, type, vol, at, f2) {
+    if (!SND) return;
+    var c = ac(); if (!c) return;
+    var t = c.currentTime + (at || 0), o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.12, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + d + 0.03);
+  }
+
+  // تیک تایمر: هرچه وقت کمتر، تندتر، بلندتر و تیزتر
+  function tick(rem) {
+    if (rem <= 0) return;
+    if (rem > 10) beep(620, 0.05, 'triangle', 0.07);
+    else if (rem > 5) beep(820, 0.06, 'triangle', 0.1);
+    else {
+      var f = 900 + (5 - rem) * 140;
+      beep(f, 0.08, 'square', 0.09);
+      beep(f, 0.08, 'square', 0.09, 0.14);
+      if (rem <= 3) { beep(f * 1.25, 0.07, 'square', 0.08, 0.26); if (navigator.vibrate) navigator.vibrate(35); }
+    }
+  }
+
+  [['#v-clues', '#clue-feedback', '#clue-row'], ['#v-books', '#book-feedback', null]].forEach(function (p) {
+    var view = $(p[0]), fb = $(p[1]), tm = $('.timer span', view);
+
+    // تایمر: شروع سوال (صدای بالارونده) و تیک‌ها
+    new MutationObserver(function () {
+      var rem = parseInt(norm(tm.textContent).split(':')[1], 10);
+      if (isNaN(rem) || rem === tm._last) return;
+      if (tm._last == null || rem > tm._last) beep(280, 0.28, 'sine', 0.12, 0, 900);
+      else tick(rem);
+      tm._last = rem;
+    }).observe(tm, { childList: true, characterData: true, subtree: true });
+
+    // جواب: درست = زنگ شاد، غلط یا تمام‌شدن وقت = بوق
+    new MutationObserver(function () {
+      if (!fb.classList.contains('show')) { tm._last = null; return; }
+      var t = ($('.tt span', fb) || {}).textContent || '';
+      if (t === 'پاسخ درست') { beep(660, 0.12, 'sine', 0.18); beep(880, 0.12, 'sine', 0.16, 0.1); beep(1320, 0.25, 'sine', 0.2, 0.2); }
+      else { beep(220, 0.28, 'sawtooth', 0.12); beep(160, 0.4, 'sawtooth', 0.12, 0.14); }
+    }).observe(fb, { attributes: true, attributeFilter: ['class'] });
+
+    // باز شدن سرنخ تازه
+    if (p[2]) {
+      var row = $(p[2]), lastN = 1;
+      new MutationObserver(function () {
+        var n = $$('.clue.revealed', row).length;
+        if (n > lastN && n > 1 && !fb.classList.contains('show')) { beep(990, 0.1, 'sine', 0.16); beep(1320, 0.16, 'sine', 0.16, 0.09); }
+        lastN = n;
+      }).observe(row, { childList: true });
+    }
+  });
+
+  // دکمه‌ی روشن/خاموش صدا کنار عنوان حالت بازی
+  var ICON = function (on) {
+    return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3l4 3.5V6L7 9.5H4Z"/>' +
+      (on ? '<path d="M15.5 9a4 4 0 0 1 0 6"/>' : '<path d="M16 9.5l5 5M21 9.5l-5 5"/>') + '</svg>';
+  };
+  var st4 = document.createElement('style');
+  st4.textContent = '.snd{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;cursor:pointer;margin-inline-start:4px;color:var(--gold);background:none;border:1px solid var(--hair-soft)}';
+  document.head.appendChild(st4);
+  $$('#v-clues .qmode, #v-books .qmode').forEach(function (q) {
+    var b = document.createElement('button'); b.className = 'snd'; b.setAttribute('aria-label', 'صدا'); b.innerHTML = ICON(SND);
+    b.addEventListener('click', function () {
+      SND = !SND;
+      try { localStorage.setItem('raz_sound', SND ? '1' : '0'); } catch (e) {}
+      $$('.snd').forEach(function (x) { x.innerHTML = ICON(SND); });
+      if (SND) beep(880, 0.1, 'sine', 0.15);
+    });
+    q.appendChild(b);
+  });
+    /* ---------- موسیقی پس‌زمینه ---------- */
+  var MUS = true, MVOL = 0.7, BPM = 72, SPB = 60 / BPM, MG = null, mTimer = null, mNext = 0, mStep = 0;
+  try { MUS = localStorage.getItem('raz_music') !== '0'; } catch (e) {}
+  var CH = [
+    { root: 45, tones: [57, 60, 64, 67] },
+    { root: 41, tones: [53, 57, 60, 64] },
+    { root: 48, tones: [60, 64, 67, 71] },
+    { root: 40, tones: [52, 55, 59, 62] }
+  ];
+  var PAT = [0, 2, 1, 3, 2, 1, 3, 2, 0, 2, 1, 3, 2, 3, 1, 2];
+  function mtof(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+  function pad(ch, t) {
+    var c = AC, dur = 8 * SPB, f = c.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 1100; f.connect(MG);
+    ch.tones.concat([ch.root]).forEach(function (m, i) {
+      var low = i === ch.tones.length, o = c.createOscillator(), g = c.createGain(), v = low ? 0.09 : 0.028;
+      o.type = low ? 'sine' : 'triangle'; o.frequency.value = mtof(m); o.detune.value = (Math.random() - 0.5) * 10;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(v, t + 1.4);
+      g.gain.setValueAtTime(v, t + dur - 0.6);
+      g.gain.linearRampToValueAtTime(0.0001, t + dur + 1.6);
+      o.connect(g); g.connect(f); o.start(t); o.stop(t + dur + 1.7);
+    });
+  }
+  function pluck(m, t) {
+    var c = AC, o = c.createOscillator(), g = c.createGain();
+    o.type = 'triangle'; o.frequency.value = mtof(m);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.06 * (0.6 + Math.random() * 0.4), t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    o.connect(g); g.connect(MG); o.start(t); o.stop(t + 0.95);
+  }
+  function mSched() {
+    var c = AC; if (!c || !MG || !MUS) return;
+    while (mNext < c.currentTime + 0.5) {
+      var ch = CH[Math.floor(mStep / 16) % CH.length], k = mStep % 16;
+      if (k === 0) pad(ch, mNext);
+      if (Math.random() < 0.85) pluck(ch.tones[PAT[k]] + 12, mNext);
+      mNext += SPB / 2; mStep++;
+    }
+  }
+  function mStart() {
+    if (!MUS || mTimer) return;
+    var c = ac(); if (!c) return;
+    MG = c.createGain(); MG.gain.setValueAtTime(0.0001, c.currentTime);
+    MG.gain.linearRampToValueAtTime(MVOL, c.currentTime + 2.5);
+    MG.connect(c.destination);
+    mNext = c.currentTime + 0.1; mStep = 0;
+    mTimer = setInterval(mSched, 120);
+  }
+  function mStop() {
+    if (!mTimer) return;
+    clearInterval(mTimer); mTimer = null;
+    var old = MG, c = AC; MG = null;
+    if (old && c) {
+      old.gain.cancelScheduledValues(c.currentTime);
+      old.gain.setValueAtTime(old.gain.value, c.currentTime);
+      old.gain.linearRampToValueAtTime(0.0001, c.currentTime + 0.6);
+      setTimeout(function () { old.disconnect(); }, 900);
+    }
+  }
+
+  // مرورگر اجازه نمی‌دهد صدا بدون لمس شروع شود؛ با اولین لمس موسیقی شروع می‌شود
+  document.addEventListener('pointerdown', function () { if (MUS) mStart(); }, { passive: true });
+  // وقتی تب یا برنامه دیده نمی‌شود، صدا قطع شود
+  document.addEventListener('visibilitychange', function () {
+    if (!AC) return;
+    if (document.hidden) AC.suspend(); else AC.resume();
+  });
+
+  /* ---------- دو سوییچ در تنظیمات: موسیقی و جلوه‌ها ---------- */
+  var st5 = document.createElement('style');
+  st5.textContent = '.sw{width:44px;height:26px;border-radius:99px;flex:none;position:relative;background:rgba(255,248,233,.14);border:1px solid var(--hair-soft);transition:.3s}' +
+    '.sw i{position:absolute;top:2px;inset-inline-start:2px;width:20px;height:20px;border-radius:50%;background:var(--cream);transition:.3s}' +
+    '.sw.on{background:linear-gradient(160deg,#FFD97A,#F6B923);border-color:transparent}' +
+    '.sw.on i{inset-inline-start:20px;background:#26332D}';
+  document.head.appendChild(st5);
+
+  var mrow = $$('#v-settings .set').filter(function (r) { return r.textContent.indexOf('صدا و موسیقی') > -1; })[0];
+  if (mrow) {
+    mrow.style.cursor = 'pointer';
+    $('.sl', mrow).innerHTML = 'موسیقی پس‌زمینه<span class="v">آرام و رازآلود · با لمس روشن یا خاموش می‌شود</span>';
+    mrow.insertAdjacentHTML('beforeend', '<span class="sw" data-sw="music"><i></i></span>');
+    var erow = mrow.cloneNode(true);
+    $('.sl', erow).innerHTML = 'جلوه‌های صوتی<span class="v">تیک تایمر، زنگ جواب درست و غلط</span>';
+    $('.sw', erow).setAttribute('data-sw', 'fx');
+    mrow.insertAdjacentElement('afterend', erow);
+  }
+  function syncSw() {
+    $$('.sw[data-sw="music"]').forEach(function (x) { x.classList.toggle('on', MUS); });
+    $$('.sw[data-sw="fx"]').forEach(function (x) { x.classList.toggle('on', SND); });
+  }
+  syncSw();
+  new MutationObserver(function () { if ($('#v-settings').classList.contains('active')) syncSw(); })
+    .observe($('#v-settings'), { attributes: true, attributeFilter: ['class'] });
+
+  $('#v-settings').addEventListener('click', function (e) {
+    var r = e.target.closest('.set'), s = r && $('.sw', r); if (!s) return;
+    if (s.dataset.sw === 'music') {
+      MUS = !MUS;
+      try { localStorage.setItem('raz_music', MUS ? '1' : '0'); } catch (x) {}
+      if (MUS) mStart(); else mStop();
+    } else {
+      SND = !SND;
+      try { localStorage.setItem('raz_sound', SND ? '1' : '0'); } catch (x) {}
+      $$('.snd').forEach(function (b) { b.innerHTML = ICON(SND); });
+      if (SND) beep(880, 0.1, 'sine', 0.15);
+    }
+    syncSw();
+  });
+    /* ---------- موسیقی نرم‌تر + قطع شدن در بازی ---------- */
+  var BUS = null;
+  BPM = 66; SPB = 60 / BPM; MVOL = 0.6;
+  CH = [
+    { root: 45, tones: [52, 57, 60, 64] },
+    { root: 41, tones: [53, 57, 60, 64] },
+    { root: 48, tones: [52, 55, 59, 60] },
+    { root: 43, tones: [50, 55, 59, 62] }
+  ];
+  PAT = [0, 2, 1, 3, 2, 1, 3, 2, 0, 2, 1, 3, 2, 3, 1, 2];
+  var SCALE = [69, 72, 74, 76, 79];
+
+  function inGame() { return $('#v-clues').classList.contains('active') || $('#v-books').classList.contains('active'); }
+
+  // پژواک نرم (ریورب) که صدا را گرم و بزرگ می‌کند
+  function impulse(c) {
+    var n = Math.floor(c.sampleRate * 2.8), b = c.createBuffer(2, n, c.sampleRate);
+    for (var k = 0; k < 2; k++) {
+      var d = b.getChannelData(k);
+      for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3);
+    }
+    return b;
+  }
+
+  function pad(ch, t) {
+    var c = AC, dur = 8 * SPB, f = c.createBiquadFilter();
+    f.type = 'lowpass'; f.frequency.value = 900; f.connect(BUS);
+    var voices = ch.tones.map(function (m) { return [m, 0.022, 'triangle']; }).concat([[ch.root, 0.08, 'sine']]);
+    voices.forEach(function (vo) {
+      [-6, 6].forEach(function (dt) {
+        var o = c.createOscillator(), g = c.createGain(), v = vo[1] * 0.7;
+        o.type = vo[2]; o.frequency.value = mtof(vo[0]); o.detune.value = dt;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.linearRampToValueAtTime(v, t + 2);
+        g.gain.setValueAtTime(v, t + dur - 0.5);
+        g.gain.linearRampToValueAtTime(0.0001, t + dur + 2.2);
+        o.connect(g); g.connect(f); o.start(t); o.stop(t + dur + 2.3);
+      });
+    });
+  }
+  function pluck(m, t, v) {
+    var c = AC, o = c.createOscillator(), g = c.createGain();
+    o.type = 'sine'; o.frequency.value = mtof(m);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(v, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.6);
+    o.connect(g); g.connect(BUS); o.start(t); o.stop(t + 1.7);
+  }
+  function mSched() {
+    var c = AC; if (!c || !BUS || !MUS) return;
+    while (mNext < c.currentTime + 0.5) {
+      var ch = CH[Math.floor(mStep / 16) % CH.length], k = mStep % 16;
+      if (k === 0) pad(ch, mNext);
+      if (Math.random() < 0.7) pluck(ch.tones[PAT[k]] + 12, mNext, 0.035 + Math.random() * 0.02);
+      if ((k === 2 || k === 8 || k === 13) && Math.random() < 0.65) pluck(SCALE[Math.floor(Math.random() * SCALE.length)], mNext, 0.03);
+      mNext += SPB / 2; mStep++;
+    }
+  }
+  function mStart() {
+    if (!MUS || mTimer || inGame()) return;
+    var c = ac(); if (!c) return;
+    MG = c.createGain(); MG.gain.setValueAtTime(0.0001, c.currentTime);
+    MG.gain.linearRampToValueAtTime(MVOL, c.currentTime + 3);
+    var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200;
+    var rv = c.createConvolver(), ws = c.createGain();
+    rv.buffer = impulse(c); ws.gain.value = 0.55;
+    BUS = c.createGain();
+    BUS.connect(MG); BUS.connect(ws); ws.connect(rv); rv.connect(MG);
+    MG.connect(lp); lp.connect(c.destination);
+    mNext = c.currentTime + 0.1; mStep = 0;
+    mTimer = setInterval(mSched, 120);
+  }
+  function mStop() {
+    if (!mTimer) return;
+    clearInterval(mTimer); mTimer = null;
+    var old = MG, c = AC; MG = null; BUS = null;
+    if (old && c) {
+      old.gain.cancelScheduledValues(c.currentTime);
+      old.gain.setValueAtTime(old.gain.value, c.currentTime);
+      old.gain.linearRampToValueAtTime(0.0001, c.currentTime + 0.5);
+      setTimeout(function () { old.disconnect(); }, 800);
+    }
+  }
+
+  // وارد صفحه‌ی سوال شدی: موسیقی قطع. از بازی بیرون آمدی: موسیقی برمی‌گردد.
+  ['#v-clues', '#v-books'].forEach(function (s) {
+    new MutationObserver(function () { if (inGame()) mStop(); else if (MUS) mStart(); })
+      .observe($(s), { attributes: true, attributeFilter: ['class'] });
+  });
+    /* ---------- صفحه‌ی خوش‌آمدگویی (لودینگ فرضی) ---------- */
+  var SPLASH_SEC = 10;   // مدت نمایش به ثانیه
+
+  var st6 = document.createElement('style');
+  st6.textContent =
+    '#raz-splash{position:absolute;inset:0;z-index:40;background:#05100e;transition:opacity .7s ease;overflow:hidden}' +
+    '#raz-splash img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%}' +
+    '#raz-splash .sp-fade{position:absolute;inset:auto 0 0 0;height:30%;background:linear-gradient(180deg,rgba(5,16,14,0),rgba(5,16,14,.85))}' +
+    '#raz-splash .sp-pct{position:absolute;inset-inline:0;bottom:calc(50px + env(safe-area-inset-bottom,0px));text-align:center;font-size:14px;font-weight:700;color:var(--gold-l);text-shadow:0 2px 10px rgba(0,0,0,.8)}' +
+    '#raz-splash .sp-bar{position:absolute;inset-inline:26px;bottom:calc(34px + env(safe-area-inset-bottom,0px));height:4px;border-radius:99px;background:rgba(255,248,233,.18);overflow:hidden}' +
+    '#raz-splash .sp-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#C98F0B,#F6B923 60%,#FFE6AE);box-shadow:0 0 12px rgba(246,185,35,.7)}';
+  document.head.appendChild(st6);
+
+  var sp = document.createElement('div');
+  sp.id = 'raz-splash';
+    sp.innerHTML = '<img src="https://i.postimg.cc/sgfwDZYY/1792868192094.jpg" alt="">' +
+    '<div class="sp-fade"></div>' +
+    '<div class="sp-pct" id="sp-pct">۰٪</div>' +
+    '<div class="sp-bar"><i id="sp-fill"></i></div>';
+  $('#app').appendChild(sp);
+
+  var spT0 = Date.now();
+  var spIv = setInterval(function () {
+    var p = Math.min(1, (Date.now() - spT0) / (SPLASH_SEC * 1000));
+    $('#sp-fill').style.width = (p * 100) + '%';
+    $('#sp-pct').textContent = fa(Math.floor(p * 100)) + '٪';
+    if (p >= 1) {
+      clearInterval(spIv);
+      sp.style.opacity = '0';
+      setTimeout(function () { sp.remove(); }, 800);
+    }
+  }, 100);
+})();
     </script>
-</body>
-</html>
+</body></html>
